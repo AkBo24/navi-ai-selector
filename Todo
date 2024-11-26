@@ -1,0 +1,6 @@
+Change `CORS_ALLOW_ALL_ORIGINS` to only development origin
+Implement `get_anthropic_models`
+Impement `anthropic_completion`
+Explore if converting the Django Provider/Model and Completion Classes in `views.py` into a model for extensibility is a good choice
+Verify if `max_tokens` in `openai_completion` is acceptable
+Implement `model_id` validations for `openai_completion` and `anthropic_completion` (make sure `model_id` is a real model…)
