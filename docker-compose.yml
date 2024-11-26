@@ -1,0 +1,20 @@
+services:
+    app:
+        build:
+            context: ./app
+        command: python /usr/src/app/manage.py runserver 0.0.0.0:8000
+        volumes:
+            - ./app:/usr/src/app/
+        ports:
+            - '8000:8000'
+    frontend:
+        build:
+            context: ./frontend
+        command: npm run --prefix /usr/src/app dev
+        volumes:
+            - ./frontend:/usr/src/app
+            - /usr/src/app/node_modules/
+        ports:
+            - '3000:3000'
+        environment:
+            - CHOKIDAR_USEPOLLING=true # Ensure Vite uses polling for file watching

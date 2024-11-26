@@ -1,0 +1,14 @@
+from django.contrib import admin
+
+from .models import User, Todo
+
+# Register your models here.
+admin.site.register(User)
+admin.site.register(Todo)
+
+"""
+{
+  "refresh": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTczMjY5MjAyOCwiaWF0IjoxNzMyNjA1NjI4LCJqdGkiOiI1NzI1OWQzM2ZkZjQ0ZTBjOGU0NGMwMjgzYTY3M2YxNSIsInVzZXJfaWQiOiI0ZGM1ZjE3Ni04ZWU4LTRjODAtYjhmNi01NDk2MmY5NWRlNjUifQ.ilzyZr9FP4G8PNjDibCOS-EwXx9EtlBobZjQixOFDXo",
+  "access": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzMyNjA1OTI4LCJpYXQiOjE3MzI2MDU2MjgsImp0aSI6IjNmMTUyNzU5ZGYwMDRkZDY5ZGYyZDkyOGMxYWQ2NGFmIiwidXNlcl9pZCI6IjRkYzVmMTc2LThlZTgtNGM4MC1iOGY2LTU0OTYyZjk1ZGU2NSJ9.xAStvLjPRQYr4Oxy1fp8z4PEIkg7BncOMdvgBb7wzs8"
+}
+"""
