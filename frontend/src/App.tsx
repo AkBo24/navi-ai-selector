@@ -1,19 +1,16 @@
 import { Container, Typography } from '@mui/material';
-import TodoList from './components/Todo/TodoList';
 import { useCheckAuthQuery } from './services/api';
-import Login from './components/Login/Login';
+import AiProvider from './features/AiProvider/AiProvider';
 
 function App() {
-    const { data: isAuthenticated, isError, isSuccess } = useCheckAuthQuery();
+    const { data: isAuthenticated } = useCheckAuthQuery();
     console.log(isAuthenticated);
 
     return (
         <Container maxWidth='sm'>
-            <Typography variant='h3' textAlign='center'>
-                Todos
-            </Typography>
-            {isError && <Login />}
-            {isSuccess && <TodoList />}
+            <Typography variant='h3'>Navi AI Project</Typography>
+            {/* TODO: Implment Login */}
+            <AiProvider />
         </Container>
     );
 }
