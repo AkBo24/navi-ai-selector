@@ -15,6 +15,7 @@ help:
 	@echo "  make up                      Start the Docker containers"
 	@echo "  make up-build                Build and Start the Docker containers"
 	@echo "  make down                    Stop the Docker containers"
+	@echo "  make restart                 Stop and rebuild the Docker containers"
 	@echo "  make <app/frontend>-shell    Open a shell inside the app or frontend container"
 	@echo "  make <app/frontend>-logs	  Print logs inside the app or frontend container"
 	@echo "  make <app/frontend>-logs-f	  Stream logs inside the app  or frontendcontainer"
@@ -37,6 +38,9 @@ up-build:
 
 down:
 	$(DOCKER_COMPOSE) down
+
+restart:
+	$(DOCKER_COMPOSE) down && $(DOCKER_COMPOSE) up -d --build
 
 app-shell:
 	$(DOCKER_COMPOSE) exec $(APP_CONTAINER) /bin/bash #-c "cd usr/src/app && bash"
