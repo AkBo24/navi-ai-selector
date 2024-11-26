@@ -7,7 +7,7 @@ router = DefaultRouter(trailing_slash=False)
 
 urlpatterns = [
     path('', include(router.urls)),
-    path('providers/', views.ProviderListView.as_view(), name='provider-list'),
-    path('providers/<str:provider_name>/models/', views.ModelListView.as_view(), name='model-list'),
-    path('providers/<str:provider_name>/models/<str:model_id>/completions/', views.CompletionView.as_view(), name='completion'),
+    path('api/providers/', views.ProviderListView.as_view(), name='provider-list'),
+    path('api/providers/<str:provider_name>/models/', views.ModelListView.as_view(), name='model-list'),
+    path('api/providers/<str:provider_name>/models/<str:model_id>/completions/', views.CompletionView.as_view(), name='completion'),
 ]

@@ -1,30 +1,34 @@
-import { Autocomplete, TextField } from '@mui/material';
-
-const options = [
-    {
-        provider: 'Open AI',
-        models: ['Model 1', 'Model 2'],
-    },
-    {
-        provider: 'Anthropic',
-        models: ['Model 1', 'Model 2'],
-    },
-];
+import { Autocomplete, TextField, Typography } from '@mui/material';
+import { useGetProvidersQuery, useLazyGetModelsQuery } from '../../../services/api';
+import { useState } from 'react';
 
 const ProviderSelector = () => {
-    return (
+    const { data: providers, isSuccess } = useGetProvidersQuery();
+    const [trigger] = useLazyGetModelsQuery();
+    const [models, setModels] = useState<string[]>([]);
+
+    return isSuccess ? (
         <>
             <Autocomplete
-                options={options.map(({ provider }) => provider)}
+                options={providers}
                 renderInput={(params) => <TextField {...params} label='Provider' />}
                 fullWidth
+                onChange={async () => {
+                    const { data, isSuccess } = await trigger('OpenAi');
+                    if (isSuccess) {
+                        setModels(data);
+                    }
+                }}
             />
             <Autocomplete
-                options={options[0].models}
+                options={models}
                 renderInput={(params) => <TextField {...params} label='Model' />}
                 fullWidth
+                noOptionsText='Choose a model'
             />
         </>
+    ) : (
+        <Typography>Loading</Typography>
     );
 };
 

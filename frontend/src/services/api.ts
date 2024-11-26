@@ -1,5 +1,7 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
+export type Provider = 'OpenAi' | 'Anthropic';
+
 export type User = {
     username: string;
     email?: string;
@@ -16,7 +18,7 @@ export type Todo = {
 export const api = createApi({
     reducerPath: 'api',
     baseQuery: fetchBaseQuery({ baseUrl: 'http://localhost:8000/api/' }),
-    tagTypes: ['todos', 'user'],
+    tagTypes: ['todos', 'user', 'models'],
     endpoints: (builder) => ({
         checkAuth: builder.query<object, void>({
             query: () => `auth/users/me`,
@@ -28,6 +30,13 @@ export const api = createApi({
         >({
             query: () => `auth/jwt/create`,
             invalidatesTags: ['user'],
+        }),
+        getProviders: builder.query<Provider[], void>({
+            query: () => `providers`,
+        }),
+        getModels: builder.query<string[], Provider>({
+            query: (provider) => `providers/${provider}/models`,
+            providesTags: ['models'],
         }),
         getTodos: builder.query<Todo[], void>({
             query: () => `todos`,
@@ -55,6 +64,8 @@ export const api = createApi({
 
 export const {
     useCheckAuthQuery,
+    useGetProvidersQuery,
+    useLazyGetModelsQuery,
     useGetTodosQuery,
     useAddTodoMutation,
     useUpdateTodoMutation,
