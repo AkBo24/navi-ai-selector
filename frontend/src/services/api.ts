@@ -64,7 +64,7 @@ export const api = createApi({
                 url: `chatrooms/${id}`,
                 method: 'DELETE',
             }),
-            invalidatesTags: ['chat-rooms', 'messages'],
+            invalidatesTags: ['chat-room', 'messages'],
         }),
         getChatRoomMessages: builder.query<Message2[], string>({
             query: (id) => `chatrooms/${id}/messages`,

@@ -6,6 +6,7 @@ import {
     TextField,
     IconButton,
     CircularProgress,
+    Chip,
 } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import {
@@ -45,16 +46,24 @@ const ChatRoom: React.FC<{ roomId: string }> = ({ roomId }) => {
 
     return (
         isSuccess && (
-            <Box sx={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
-                {/* Chat Header */}
+            <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
                 <Paper elevation={3} sx={{ padding: 2, borderBottom: '1px solid #ddd' }}>
-                    <Typography variant='h5'>{room.title}</Typography>
+                    <Box>
+                        <Typography variant='h5'>{room.title}</Typography>
+                        <Box sx={{ display: 'flex', gap: 1, marginTop: 1 }}>
+                            <Chip label={`Provider: ${room.provider}`} color='primary' />
+                            <Chip
+                                label={`Model ID: ${room.model_id}`}
+                                color='secondary'
+                            />
+                        </Box>
+                    </Box>
                 </Paper>
 
                 {/* Chat Messages */}
                 <Box
                     sx={{
-                        flex: 1,
+                        flexGrow: 1,
                         overflowY: 'auto',
                         padding: 2,
                         backgroundColor: '#f7f9fc',
