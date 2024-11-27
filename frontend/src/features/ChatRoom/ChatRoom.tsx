@@ -19,11 +19,6 @@ const ChatRoom: React.FC<{ roomId: string }> = ({ roomId }) => {
     const { data: messages, isSuccess: isMessagesSuccess } =
         useGetChatRoomMessagesQuery(roomId);
     const [createCompletion] = useCreateCompletionMutation();
-    // const prompt: Omit<Prompt, 'content'> = {
-    //     model: model_id,
-    //     provider,
-    //     systemPrompt: system_prompt,
-    // };
 
     const handleSubmit = (
         values: { content: string },

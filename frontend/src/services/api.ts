@@ -38,7 +38,7 @@ export type Message2 = {
 export const api = createApi({
     reducerPath: 'api',
     baseQuery: fetchBaseQuery({ baseUrl: 'http://localhost:8000/api/' }),
-    tagTypes: ['user', 'models', 'chat-rooms', 'messages'],
+    tagTypes: ['user', 'models', 'chat-rooms', 'messages', 'chat-room'],
     endpoints: (builder) => ({
         checkAuth: builder.query<object, void>({
             query: () => `auth/users/me`,
@@ -68,7 +68,7 @@ export const api = createApi({
         }),
         getChatRoomMessages: builder.query<Message2[], string>({
             query: (id) => `chatrooms/${id}/messages`,
-            providesTags: ['messages'],
+            providesTags: ['chat-room', 'messages'],
         }),
         getProviders: builder.query<Provider[], void>({
             query: () => `providers`,
@@ -90,7 +90,7 @@ export const api = createApi({
                     chatroom_id: id,
                 },
             }),
-            invalidatesTags: ['chat-rooms', 'messages'],
+            invalidatesTags: ['chat-room', 'messages'],
         }),
     }),
 });
