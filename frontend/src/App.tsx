@@ -6,7 +6,6 @@ import MenuIcon from '@mui/icons-material/Menu';
 import NewChat from './features/NewChat';
 import Menu from './components/Menu';
 import ChatRoom from './features/ChatRoom/ChatRoom';
-import ChatRoomStreaming from './features/ChatRoom/ChatRoomStreaming';
 
 const theme = createTheme({
     palette: {
@@ -76,7 +75,7 @@ const App: React.FC = () => {
                         height: 'calc(100vh - 64px)', // Subtract AppBar height
                     }}>
                     {currentRoom != null ? (
-                        <ChatRoomStreaming
+                        <ChatRoom
                             roomId={currentRoom.id || ''}
                             initialContent={initialContent}
                             clearInitialContent={() => setInitialContent(null)}
