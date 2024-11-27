@@ -1,5 +1,4 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import ChatRoom from '../features/ChatRoom/ChatRoom';
 
 export type Provider = 'OpenAi' | 'Anthropic';
 
@@ -37,9 +36,9 @@ export type Message2 = {
     id?: number;
     role: Role;
     content: string;
-    created_at: string;
-    input_tokens: number;
-    output_tokens: number;
+    created_at?: string;
+    input_tokens?: number;
+    output_tokens?: number;
 };
 
 export const api = createApi({
@@ -86,7 +85,7 @@ export const api = createApi({
                 body: {
                     system_prompt: systemPrompt,
                     message: content,
-                    id,
+                    chatroom_id: id,
                 },
             }),
             invalidatesTags: ['chat-rooms', 'messages'],

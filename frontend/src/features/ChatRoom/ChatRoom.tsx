@@ -1,5 +1,10 @@
 import { Box, Typography } from '@mui/material';
-import { Prompt, useCreateCompletionMutation, type ChatRoom } from '../../services/api';
+import {
+    Prompt,
+    Role,
+    useCreateCompletionMutation,
+    type ChatRoom,
+} from '../../services/api';
 import { Formik } from 'formik';
 import Message from './components/Message';
 import * as yup from 'yup';
@@ -18,11 +23,14 @@ const ChatRoom: React.FC<{ room: ChatRoom }> = ({
         provider,
         systemPrompt: system_prompt,
     };
+    console.log(messages);
+
     const handleSubmit = (
-        values: Pick<Prompt, 'content'>,
+        values: { content: string },
         { resetForm }: { resetForm: () => void }
     ) => {
         console.log('Submitted:', values);
+
         createCompletion({
             ...prompt,
             content: values.content,
@@ -44,9 +52,7 @@ const ChatRoom: React.FC<{ room: ChatRoom }> = ({
                 <Typography variant='h4' sx={{ mb: 2 }}>
                     {title}
                 </Typography>
-                {messages.map((m) => (
-                    <Message message={m} />
-                ))}
+                {messages.map((m) => m.role != 'system' && <Message message={m} />)}
             </Box>
             <Formik
                 initialValues={{ content: '' }}

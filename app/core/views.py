@@ -59,6 +59,7 @@ class CompletionView(APIView):
         request=CompletionSerializer,
         responses={200: MessageSerializer}
     )
+
     def post(self, request, provider_name, model_id):
         serializer = CompletionSerializer(data=request.data)
         if not serializer.is_valid():
@@ -82,7 +83,7 @@ class CompletionView(APIView):
                 system_prompt=system_prompt
             )
 
-        # Save user message
+        # Save only the new message
         Message.objects.create(
             chatroom=chatroom,
             role='user',

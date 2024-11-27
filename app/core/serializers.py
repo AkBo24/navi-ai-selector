@@ -24,6 +24,10 @@ class ChatRoomSerializer(serializers.ModelSerializer):
         model = ChatRoom
         fields = ['id', 'title', 'created_at', 'updated_at', 'provider', 'model_id', 'system_prompt', 'messages']
         read_only_fields = ['created_at', 'updated_at']
+    
+class MessageRequestSerializer(serializers.Serializer):
+    role = serializers.CharField()
+    content = serializers.CharField()
 
 class CompletionSerializer(serializers.Serializer):
     chatroom_id = serializers.UUIDField(required=False)
