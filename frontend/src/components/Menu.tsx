@@ -4,17 +4,58 @@ import {
     Typography,
     Button,
     List,
-    ListItem,
+    ListItemButton,
     ListItemText,
+    IconButton,
+    Tooltip,
+    Menu as MuiMenu,
+    MenuItem,
 } from '@mui/material';
-import React from 'react';
-import { ChatRoom, useGetChatroomsQuery } from '../services/api';
+import React, { useState } from 'react';
+import {
+    ChatRoom,
+    useDeleteChatRoomMutation,
+    useGetChatroomsQuery,
+} from '../services/api';
+import { MoreHoriz } from '@mui/icons-material';
 
 const Menu: React.FC<{
+    room: ChatRoom;
     handleNewRoom: () => void;
     handleSelectRoom: (room: ChatRoom) => void;
-}> = ({ handleNewRoom: handleNewChat, handleSelectRoom: handleSelectChat }) => {
+}> = ({ room, handleNewRoom: handleNewChat, handleSelectRoom: handleSelectChat }) => {
     const { data: chats, isSuccess } = useGetChatroomsQuery();
+    const [deleteRoom] = useDeleteChatRoomMutation();
+    const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+    const [menuRoom, setMenuRoom] = useState<ChatRoom | null>(null);
+
+    const handleMenuOpen = (
+        event: React.MouseEvent<HTMLElement>,
+        selectedRoom: ChatRoom
+    ) => {
+        setAnchorEl(event.currentTarget);
+        setMenuRoom(selectedRoom);
+    };
+
+    const handleMenuClose = () => {
+        setAnchorEl(null);
+        setMenuRoom(null);
+    };
+
+    const handleEditChat = (room: ChatRoom) => {
+        console.log('Edit chat:', room); // Replace with your edit logic
+        handleMenuClose();
+    };
+
+    const handleDeleteChat = async (room: ChatRoom) => {
+        console.log('Delete chat:', room); // Replace with your delete logic
+        if (room.id) {
+            alert('deleting');
+            const dr = await deleteRoom(room.id);
+            console.log(dr);
+        }
+        handleMenuClose();
+    };
 
     return (
         <Drawer
@@ -40,16 +81,42 @@ const Menu: React.FC<{
                 </Button>
                 <List>
                     {isSuccess &&
-                        chats.map((room, index) => (
-                            <ListItem
-                                key={index}
-                                component={Button}
-                                onClick={() => handleSelectChat(room)}>
-                                <ListItemText primary={room.title} />
-                            </ListItem>
+                        chats.map((r, i) => (
+                            <ListItemButton
+                                onClick={() => handleSelectChat(r)}
+                                selected={room && r?.id === room?.id} // Highlight the selected chat
+                                key={r.id || i}>
+                                <ListItemText primary={r.title} />
+                                <Tooltip arrow color='primary' placement='left' title=''>
+                                    <IconButton onClick={(e) => handleMenuOpen(e, r)}>
+                                        <MoreHoriz />
+                                    </IconButton>
+                                </Tooltip>
+                            </ListItemButton>
                         ))}
                 </List>
             </Box>
+
+            {/* Context Menu */}
+            <MuiMenu
+                anchorEl={anchorEl}
+                open={Boolean(anchorEl)}
+                onClose={handleMenuClose}
+                anchorOrigin={{
+                    vertical: 'top',
+                    horizontal: 'right',
+                }}
+                transformOrigin={{
+                    vertical: 'top',
+                    horizontal: 'right',
+                }}>
+                <MenuItem onClick={() => menuRoom && handleEditChat(menuRoom)}>
+                    Edit
+                </MenuItem>
+                <MenuItem onClick={() => menuRoom && handleDeleteChat(menuRoom)}>
+                    Delete
+                </MenuItem>
+            </MuiMenu>
         </Drawer>
     );
 };

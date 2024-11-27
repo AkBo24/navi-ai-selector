@@ -62,6 +62,13 @@ export const api = createApi({
             query: () => `chatrooms`,
             providesTags: ['chat-rooms', 'messages'],
         }),
+        deleteChatRoom: builder.mutation<void, string>({
+            query: (id) => ({
+                url: `chatrooms/${id}`,
+                method: 'DELETE',
+            }),
+            invalidatesTags: ['chat-rooms', 'messages'],
+        }),
         getProviders: builder.query<Provider[], void>({
             query: () => `providers`,
         }),
@@ -91,6 +98,7 @@ export const {
     useCheckAuthQuery,
     useGetProvidersQuery,
     useGetChatroomsQuery,
+    useDeleteChatRoomMutation,
     useLazyGetModelsQuery,
     useCreateCompletionMutation,
 } = api;

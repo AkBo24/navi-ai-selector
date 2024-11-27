@@ -18,14 +18,13 @@ const App: React.FC = () => {
         setCurrentRoom(chat); // Load the selected chat
     };
 
-    // const handleRoomCreated = () => {
-    //     setIsNewRoom(false); // After creating a new chat, go to normal UI
-    //     setCurrentRoom('New Chat'); // Optionally set the new chat name
-    // };
-
     return (
         <Box width='100%' sx={{ display: 'flex', height: '100vh' }}>
-            <Menu handleNewRoom={handleNewRoom} handleSelectRoom={handleSelectRoom} />
+            <Menu
+                handleNewRoom={handleNewRoom}
+                handleSelectRoom={handleSelectRoom}
+                room={currentRoom}
+            />
 
             <Box
                 sx={{
@@ -35,15 +34,11 @@ const App: React.FC = () => {
                     p: 2,
                 }}>
                 {isNewRoom ? (
-                    // Show the form for creating a new chat
-                    // onChatCreated={handleChatCreated}
                     <AiProvider handleSelectRoom={handleSelectRoom} />
                 ) : currentRoom ? (
-                    // Show the normal chat UI
                     <ChatRoom room={currentRoom} />
                 ) : (
-                    // Placeholder for when no chat is selected
-                    <Typography variant='body1' sx={{ p: 2 }}>
+                    <Typography sx={{ p: 2 }}>
                         Select a chat or start a new one.
                     </Typography>
                 )}

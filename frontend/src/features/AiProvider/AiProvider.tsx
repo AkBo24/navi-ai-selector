@@ -64,7 +64,9 @@ const AiProvider: React.FC<{ handleSelectRoom: (room: ChatRoom) => void }> = ({
                 return;
             }
 
-            handleSelectRoom(data.chatroom);
+            if ('chatroom' in data) {
+                handleSelectRoom(data.chatroom);
+            }
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (err: unknown) {
             setCompletionError('An unexpected error occurred. Please try again.');
