@@ -19,6 +19,7 @@ import { Formik } from 'formik';
 import Message from './components/Message';
 import * as yup from 'yup';
 import FormikTextField from '../../components/FormikTextField';
+import Loading from './components/Loading';
 
 const schema = yup.object().shape({
     content: yup.string(),
@@ -29,7 +30,7 @@ const ChatRoom: React.FC<{
     initialContent?: string;
     clearInitialContent: () => void;
 }> = ({ roomId, initialContent, clearInitialContent }) => {
-    const { data: room, isSuccess } = useGetChatRoomQuery(roomId);
+    const { data: room, isSuccess, isLoading } = useGetChatRoomQuery(roomId);
     const { data: messages, isSuccess: isMessagesSuccess } =
         useGetChatRoomMessagesQuery(roomId);
     const [createCompletionStreaming] = useCreateCompletionStreamingMutation();
@@ -107,7 +108,9 @@ const ChatRoom: React.FC<{
         }
     };
 
-    return (
+    return isLoading ? (
+        <Loading />
+    ) : (
         isSuccess && (
             <>
                 <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
