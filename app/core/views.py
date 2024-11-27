@@ -176,40 +176,31 @@ class CompletionView(APIView):
     def stream_anthropic_response(self, model_id, chatroom, system_prompt, messages):
         try:
             client = Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
-            
+
             # Format messages for Anthropic's API
             message_list = []
             for msg in messages:
                 if msg.role != 'system':
                     # Anthropic only accepts 'user' and 'assistant' roles
-                    role = 'user' if msg.role in ['user', 'human'] else 'assistant'
+                    # role = 'user' if msg.role in ['user', 'human'] else 'assistant'
                     message_list.append({
-                        "role": role,
+                        "role": msg.role,
                         "content": msg.content
                     })
 
-            # Initialize content accumulator
-            full_content = ""
-            
-            # Stream the response
             stream = client.messages.create(
-                model=model_id,
-                system=system_prompt if system_prompt else None,
-                max_tokens=1000,
+                max_tokens=1024,
                 messages=message_list,
-                stream=True
+                model="claude-3-opus-20240229",
+                stream=True,
             )
 
-            for chunk in stream:
-                if isinstance(chunk.type, str) and chunk.type == "content_block_start":
-                    continue
-                if hasattr(chunk, 'content'):
-                    content = chunk.content[0].text
-                    full_content += content
-                    print(content)
-                    yield f"data: {json.dumps({'content': content, 'type': 'chunk'})}\n\n"
+            full_content = ""
+            for event in stream:
+                print(event.type)
+                if event.type == 'content_block_delta':
+                    full_content += event.delta.text
 
-            # Save the complete message after streaming
             message = Message.objects.create(
                 chatroom=chatroom,
                 role='assistant',
@@ -217,9 +208,37 @@ class CompletionView(APIView):
                 input_tokens=None,
                 output_tokens=None
             )
+
+            yield f"data: {json.dumps({'type': 'done', 'message': full_content})}\n\n"
             
-            # Send final message with complete content
-            yield f"data: {json.dumps({'type': 'done', 'message': MessageSerializer(message).data})}\n\n"
+
+
+            # # Initialize content accumulator
+            # full_content = ""
+            
+            # # Stream the response
+            # stream = client.messages.create(
+            #     model=model_id,
+            #     system=system_prompt if system_prompt else None,
+            #     max_tokens=1000,
+            #     messages=message_list,
+            #     stream=True
+            # )
+
+            # for chunk in stream:
+            #     if isinstance(chunk.type, str) and chunk.type == "content_block_start":
+            #         continue
+            #     if hasattr(chunk, 'content'):
+            #         content = chunk.content[0].text
+            #         full_content += content
+            #         print(content)
+            #         yield f"data: {json.dumps({'content': content, 'type': 'chunk'})}\n\n"
+
+            # # Save the complete message after streaming
+
+            
+            # # Send final message with complete content
+            # yield f"data: {json.dumps({'type': 'done', 'message': MessageSerializer(message).data})}\n\n"
             
         except Exception as e:
             print(f"Anthropic streaming error: {str(e)}")
