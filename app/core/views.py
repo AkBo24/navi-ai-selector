@@ -77,6 +77,10 @@ class ModelListView(APIView):
             return {'error': str(e)}
 
 class CompletionView(APIView):
+    @extend_schema(
+        request=CompletionSerializer,
+        responses={200: MessageSerializer}
+    )
     def post(self, request, provider_name, model_id):
         serializer = CompletionSerializer(data=request.data)
         if not serializer.is_valid():

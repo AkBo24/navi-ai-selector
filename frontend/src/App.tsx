@@ -19,6 +19,7 @@ const theme = createTheme({
 const App: React.FC = () => {
     const [mobileOpen, setMobileOpen] = useState(false);
     const [currentRoom, setCurrentRoom] = useState<ChatRoomType | null>(null);
+    const [initialContent, setInitialContent] = useState<string | null>(null);
 
     const handleDrawerToggle = () => {
         setMobileOpen(!mobileOpen);
@@ -28,8 +29,11 @@ const App: React.FC = () => {
         setCurrentRoom(null);
     };
 
-    const handleSelectRoom = (chat: ChatRoomType | null) => {
+    const handleSelectRoom = (chat: ChatRoomType | null, initialContent?: string) => {
         setCurrentRoom(chat);
+        if (initialContent) {
+            setInitialContent(initialContent);
+        }
     };
 
     return (
@@ -72,8 +76,11 @@ const App: React.FC = () => {
                         height: 'calc(100vh - 64px)', // Subtract AppBar height
                     }}>
                     {currentRoom != null ? (
-                        // <ChatRoom roomId={currentRoom.id || ''} />
-                        <ChatRoomStreaming roomId={currentRoom.id || ''} />
+                        <ChatRoomStreaming
+                            roomId={currentRoom.id || ''}
+                            initialContent={initialContent}
+                            clearInitialContent={() => setInitialContent(null)}
+                        />
                     ) : (
                         <NewChat handleSelectRoom={handleSelectRoom} />
                     )}

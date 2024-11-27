@@ -10,8 +10,8 @@ export type User = {
 export type ChatRoom = {
     id?: string;
     title: string;
-    created_at: string;
-    updated_at: string;
+    created_at?: string;
+    updated_at?: string;
     provider: Provider;
     model_id: string;
     system_prompt: string;
@@ -53,18 +53,37 @@ export const api = createApi({
         }),
         getChatrooms: builder.query<ChatRoom[], void>({
             query: () => `chatrooms`,
-            providesTags: ['chat-rooms', 'messages'],
+            providesTags: ['chat-rooms'],
         }),
         getChatRoom: builder.query<ChatRoom, string>({
             query: (id) => `chatrooms/${id}`,
-            providesTags: ['chat-room'],
+            providesTags: (result, error, id) => [{ type: 'chat-room', id }],
+        }),
+        createChatRoom: builder.mutation<ChatRoom, ChatRoom>({
+            query: (body) => ({
+                url: `chatrooms`,
+                method: 'POST',
+                body,
+            }),
+            invalidatesTags: ['chat-rooms'],
+        }),
+        updateChatRoom: builder.mutation<Partial<ChatRoom>, Partial<ChatRoom>>({
+            query: ({ id, ...body }) => ({
+                url: `chatrooms/${id}`,
+                method: 'PATCH',
+                body,
+            }),
+            invalidatesTags: (result, error, { id }) => [
+                { type: 'chat-room', id },
+                'chat-rooms',
+            ],
         }),
         deleteChatRoom: builder.mutation<void, string>({
             query: (id) => ({
                 url: `chatrooms/${id}`,
                 method: 'DELETE',
             }),
-            invalidatesTags: ['chat-room', 'messages'],
+            invalidatesTags: ['chat-room', 'messages', 'chat-rooms'],
         }),
         getChatRoomMessages: builder.query<Message2[], string>({
             query: (id) => `chatrooms/${id}/messages`,
@@ -238,6 +257,8 @@ export const {
     useGetChatroomsQuery,
     useGetChatRoomQuery,
     useGetChatRoomMessagesQuery,
+    useCreateChatRoomMutation,
+    useUpdateChatRoomMutation,
     useDeleteChatRoomMutation,
     useLazyGetModelsQuery,
     useCreateCompletionMutation,
