@@ -18,8 +18,6 @@ import {
     ChatRoom,
     Prompt,
     useCreateChatRoomMutation,
-    useCreateCompletionMutation,
-    useCreateCompletionStreamingMutation,
     useGetProvidersQuery,
     useLazyGetModelsQuery,
 } from '../services/api';
@@ -43,10 +41,8 @@ const NewChat: React.FC<{
         isLoading: isProvidersLoading,
     } = useGetProvidersQuery();
 
-    const [createCompletion] = useCreateCompletionMutation();
     const [createRoom, { isLoading: isCreating }] = useCreateChatRoomMutation();
     const [getModels, { isFetching: isModelsFetching }] = useLazyGetModelsQuery();
-    const [createCompletionStreaming] = useCreateCompletionStreamingMutation();
     const [models, setModels] = useState<string[]>([]);
     const [completionError, setCompletionError] = useState<string | undefined>();
 
@@ -62,6 +58,8 @@ const NewChat: React.FC<{
                 title: values.systemPrompt.slice(0, 51),
             });
 
+            // If we have an error, concat them into a single message
+            // In a larger project, stacking toasts is preferred
             if (error) {
                 let errorMessage = 'An unknown error occurred';
                 if ('data' in error && typeof error.data === 'object') {
@@ -78,7 +76,8 @@ const NewChat: React.FC<{
                 return;
             }
 
-            // Pass the initial content to handleSelectRoom
+            // Set the selected room to the new room and
+            // pass the initial content to handleSelectRoom
             handleSelectRoom(room, values.content);
         } catch (err) {
             console.error(err);
@@ -114,6 +113,7 @@ const NewChat: React.FC<{
                                 Start a New Chat
                             </Typography>
                             <Box display='flex' flexDirection='column' gap={2}>
+                                {/* Provider Selection */}
                                 <Autocomplete
                                     options={isProvidersSuccess ? providers : []}
                                     getOptionLabel={(option) => option || ''}
@@ -199,6 +199,7 @@ const NewChat: React.FC<{
                                     }
                                 />
 
+                                {/* System Prompt & Use Message */}
                                 <FormikTextField
                                     name='systemPrompt'
                                     label='System Prompt'
