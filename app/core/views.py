@@ -199,9 +199,11 @@ class CompletionView(APIView):
             for event in stream:
                 print(event.type)
                 if event.type == 'content_block_delta':
-                    full_content += event.delta.text
+                    content = event.delta.text
+                    full_content += content
+                    yield f"data: {json.dumps({'content': content, 'type': 'chunk'})}\n\n"
 
-            message = Message.objects.create(
+            Message.objects.create(
                 chatroom=chatroom,
                 role='assistant',
                 content=full_content,
@@ -210,35 +212,6 @@ class CompletionView(APIView):
             )
 
             yield f"data: {json.dumps({'type': 'done', 'message': full_content})}\n\n"
-            
-
-
-            # # Initialize content accumulator
-            # full_content = ""
-            
-            # # Stream the response
-            # stream = client.messages.create(
-            #     model=model_id,
-            #     system=system_prompt if system_prompt else None,
-            #     max_tokens=1000,
-            #     messages=message_list,
-            #     stream=True
-            # )
-
-            # for chunk in stream:
-            #     if isinstance(chunk.type, str) and chunk.type == "content_block_start":
-            #         continue
-            #     if hasattr(chunk, 'content'):
-            #         content = chunk.content[0].text
-            #         full_content += content
-            #         print(content)
-            #         yield f"data: {json.dumps({'content': content, 'type': 'chunk'})}\n\n"
-
-            # # Save the complete message after streaming
-
-            
-            # # Send final message with complete content
-            # yield f"data: {json.dumps({'type': 'done', 'message': MessageSerializer(message).data})}\n\n"
             
         except Exception as e:
             print(f"Anthropic streaming error: {str(e)}")
