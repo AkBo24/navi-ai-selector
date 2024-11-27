@@ -29,7 +29,7 @@ const Menu: React.FC<{
             }}>
             <Box sx={{ overflow: 'auto' }}>
                 <Typography variant='h6' sx={{ p: 2 }}>
-                    Past Chats
+                    Navi AI Assignment
                 </Typography>
                 <Button
                     variant='contained'

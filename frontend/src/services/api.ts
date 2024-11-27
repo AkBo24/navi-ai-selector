@@ -1,4 +1,5 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import ChatRoom from '../features/ChatRoom/ChatRoom';
 
 export type Provider = 'OpenAi' | 'Anthropic';
 
@@ -44,7 +45,7 @@ export type Message2 = {
 export const api = createApi({
     reducerPath: 'api',
     baseQuery: fetchBaseQuery({ baseUrl: 'http://localhost:8000/api/' }),
-    tagTypes: ['todos', 'user', 'models'],
+    tagTypes: ['user', 'models', 'chat-rooms', 'messages'],
     endpoints: (builder) => ({
         checkAuth: builder.query<object, void>({
             query: () => `auth/users/me`,
@@ -59,6 +60,7 @@ export const api = createApi({
         }),
         getChatrooms: builder.query<ChatRoom[], void>({
             query: () => `chatrooms`,
+            providesTags: ['chat-rooms', 'messages'],
         }),
         getProviders: builder.query<Provider[], void>({
             query: () => `providers`,
@@ -67,16 +69,20 @@ export const api = createApi({
             query: (provider) => `providers/${provider.toLowerCase()}/models`,
             providesTags: ['models'],
         }),
-        createCompletion: builder.mutation<ChatRoom, Prompt & { id?: string }>({
+        createCompletion: builder.mutation<
+            { message: Message2; chatroom: ChatRoom } | ChatRoom,
+            Prompt & { id?: string }
+        >({
             query: ({ provider, model, systemPrompt, content, id }) => ({
                 url: `/providers/${provider.toLowerCase()}/models/${model.toLowerCase()}/complete`,
                 method: 'POST',
                 body: {
                     system_prompt: systemPrompt,
-                    content,
+                    message: content,
                     id,
                 },
             }),
+            invalidatesTags: ['chat-rooms', 'messages'],
         }),
     }),
 });

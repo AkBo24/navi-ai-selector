@@ -37,7 +37,7 @@ const App: React.FC = () => {
                 {isNewRoom ? (
                     // Show the form for creating a new chat
                     // onChatCreated={handleChatCreated}
-                    <AiProvider />
+                    <AiProvider handleSelectRoom={handleSelectRoom} />
                 ) : currentRoom ? (
                     // Show the normal chat UI
                     <ChatRoom room={currentRoom} />

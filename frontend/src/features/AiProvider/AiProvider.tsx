@@ -7,8 +7,9 @@ import {
     Snackbar,
     TextField,
 } from '@mui/material';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import {
+    ChatRoom,
     Prompt,
     useCreateCompletionMutation,
     useGetProvidersQuery,
@@ -23,10 +24,12 @@ const schema = yup.object<Prompt>({
     provider: yup.string().oneOf(['Anthropic', 'OpenAI']).required('Required'),
     model: yup.string().required('Required'),
     systemPrompt: yup.string().required('Required'),
-    message: yup.string().required('Required'),
+    content: yup.string().required('Required'),
 });
 
-const AiProvider = () => {
+const AiProvider: React.FC<{ handleSelectRoom: (room: ChatRoom) => void }> = ({
+    handleSelectRoom,
+}) => {
     const { data: providers, isSuccess, isLoading } = useGetProvidersQuery();
     const [createCompletion] = useCreateCompletionMutation();
     const [trigger] = useLazyGetModelsQuery();
@@ -35,12 +38,15 @@ const AiProvider = () => {
     const [completionError, setCompletionError] = useState<string | undefined>();
 
     const handleSubmit = async (values: Prompt) => {
+        console.log(values);
         try {
-            const { error } = await createCompletion(values);
+            const { data, error } = await createCompletion(values);
 
             if (error) {
                 // Extract and format error messages from FetchBaseQueryError
                 const errorData = (error as FetchBaseQueryError)?.data;
+                console.error(error);
+
                 let errorMessage = 'An unknown error occurred';
 
                 if (errorData && typeof errorData === 'object') {
@@ -58,6 +64,7 @@ const AiProvider = () => {
                 return;
             }
 
+            handleSelectRoom(data.chatroom);
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (err: unknown) {
             setCompletionError('An unexpected error occurred. Please try again.');
@@ -75,14 +82,7 @@ const AiProvider = () => {
                     systemPrompt: '',
                     content: '',
                 }}>
-                {({
-                    values,
-                    errors,
-                    touched,
-                    handleChange,
-                    setFieldValue,
-                    submitForm,
-                }) => (
+                {({ values, errors, setFieldValue, submitForm }) => (
                     <Container>
                         <Box display='flex' gap={2} mb={2}>
                             <Autocomplete
@@ -145,7 +145,7 @@ const AiProvider = () => {
                             />
 
                             <FormikTextField
-                                name='message'
+                                name='content'
                                 label='Message'
                                 variant='outlined'
                             />
