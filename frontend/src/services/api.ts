@@ -67,9 +67,9 @@ export const api = createApi({
             query: (provider) => `providers/${provider.toLowerCase()}/models`,
             providesTags: ['models'],
         }),
-        createCompletion: builder.mutation<any, Prompt>({
+        createCompletion: builder.mutation<ChatRoom, Prompt>({
             query: ({ provider, model, systemPrompt, message }) => ({
-                url: `/providers/${provider}/models/${model}/completions/`,
+                url: `/providers/${provider.toLowerCase()}/models/${model.toLowerCase()}/complete`,
                 method: 'POST',
                 body: {
                     system_prompt: systemPrompt,

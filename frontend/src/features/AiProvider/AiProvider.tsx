@@ -151,14 +151,14 @@ const AiProvider = () => {
                             />
                         </Box>
 
-                        <Box
+                        {/* <Box
                             display='flex'
                             flexDirection='column'
                             sx={{ maxHeight: 400, overflowY: 'auto', mb: 2 }}>
                             {messages.map((m, i) => (
                                 <Message message={m} key={i} />
                             ))}
-                        </Box>
+                        </Box> */}
 
                         <Box display='flex' flexDirection='column' gap={2}>
                             <TextField
