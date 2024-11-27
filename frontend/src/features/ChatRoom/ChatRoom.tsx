@@ -20,6 +20,7 @@ import Message from './components/Message';
 import * as yup from 'yup';
 import FormikTextField from '../../components/FormikTextField';
 import Loading from './components/Loading';
+import LoadingMessageSkeleton from './components/LoadingMessageSkeleton';
 
 const schema = yup.object().shape({
     content: yup.string(),
@@ -46,9 +47,10 @@ const ChatRoom: React.FC<{
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     };
 
+    // ensure the chat scrolls to the bottom when the skeleton appears
     useEffect(() => {
         scrollToBottom();
-    }, [messages]);
+    }, [messages, isStreaming]);
 
     useEffect(() => {
         // Initiate Streaming
@@ -148,6 +150,7 @@ const ChatRoom: React.FC<{
                                         <Message key={idx} message={m} />
                                     )
                             )}
+                        {isStreaming && <LoadingMessageSkeleton />}
                         <div ref={messagesEndRef} />
                     </Box>
 
