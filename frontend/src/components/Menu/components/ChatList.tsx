@@ -21,7 +21,7 @@ interface ChatListProps {
     chats: ChatRoom[] | undefined;
     isSuccess: boolean;
     selectedRoom: ChatRoom | null;
-    onSelectRoom: (room: ChatRoom) => void;
+    handleSelectRoom: (room: ChatRoom | null) => void;
     onEditRoom: (room: ChatRoom) => void;
 }
 
@@ -29,7 +29,7 @@ const ChatList: React.FC<ChatListProps> = ({
     chats,
     isSuccess,
     selectedRoom,
-    onSelectRoom,
+    handleSelectRoom,
     onEditRoom,
 }) => {
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -50,6 +50,7 @@ const ChatList: React.FC<ChatListProps> = ({
         if (room.id) {
             await deleteRoom(room.id);
         }
+        handleSelectRoom(null);
         handleMenuClose();
     };
 
@@ -61,7 +62,7 @@ const ChatList: React.FC<ChatListProps> = ({
                         <ListItemButton
                             key={chat.id}
                             selected={selectedRoom?.id === chat.id}
-                            onClick={() => onSelectRoom(chat)}>
+                            onClick={() => handleSelectRoom(chat)}>
                             <ListItemIcon>
                                 <ChatIcon color='action' />
                             </ListItemIcon>

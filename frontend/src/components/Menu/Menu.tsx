@@ -54,7 +54,7 @@ const Menu: React.FC<MenuProps> = ({
                 chats={chats}
                 isSuccess={isSuccess}
                 selectedRoom={room}
-                onSelectRoom={handleSelectRoom}
+                handleSelectRoom={handleSelectRoom}
                 onEditRoom={handleEditChat}
             />
         </Box>
