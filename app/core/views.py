@@ -63,6 +63,7 @@ class ModelListView(APIView):
     def get_anthropic_models(self):
         """
         Anthropic does not have an endpoint to retrieve all models.
+        Models scrapped from: https://docs.anthropic.com/en/docs/about-claude/models
         """
         try:
             models = [
@@ -77,6 +78,11 @@ class ModelListView(APIView):
             return {'error': str(e)}
 
 class CompletionView(APIView):
+    """
+    Routes the request for a message ("completion") to the appropriate router
+
+    Each streaming function immediately forwards chunks from the provider to the frontend.
+    """
     @extend_schema(
         request=CompletionSerializer,
         responses={200: MessageSerializer}

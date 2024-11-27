@@ -55,10 +55,10 @@ frontend-logs:
 	$(DOCKER_COMPOSE) logs $(FRONTEND_CONTAINER)
 
 app-logs-f:
-	$( DOCKER_COMPOSE) logs -f $(APP_CONTAINER)
+	$(DOCKER_COMPOSE) logs -f $(APP_CONTAINER)
 
 frontend-logs-f:
-	$( DOCKER_COMPOSE) logs -f $(FRONTEND_CONTAINER)
+	$(DOCKER_COMPOSE) logs -f $(FRONTEND_CONTAINER)
 
 # Django Tasks
 makemigrations:

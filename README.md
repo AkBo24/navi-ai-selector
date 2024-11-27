@@ -53,6 +53,38 @@ The application will be available at:
 -   Frontend: http://localhost:3000
 -   Backend API: http://localhost:8000
 
+4. Makemigrations and make the database (maybe necessary for a cold start)
+
+Using Make:
+
+```bash
+make makemigrations
+make migrate
+```
+
+Or using Doker Compose directly:
+
+```bash
+docker exec <app-name> python /usr/src/app/manage.py makemigrations
+docker exec  <app-name> python /usr/src/app/manage.py migrate
+```
+
+You can find the app name by running `docker ps` on your host machine.
+
+5. Shut down the server(s)
+
+Using Make:
+
+```bash
+make down
+```
+
+Or using Docker Compose directly:
+
+```bash
+docker compose down
+```
+
 ## Available Commands
 
 The project includes a Makefile for common operations. Here are some useful commands:
