@@ -17,7 +17,9 @@ import FormikTextField from '../components/FormikTextField';
 import {
     ChatRoom,
     Prompt,
+    useCreateChatRoomMutation,
     useCreateCompletionMutation,
+    useCreateCompletionStreamingMutation,
     useGetProvidersQuery,
     useLazyGetModelsQuery,
 } from '../services/api';
@@ -32,17 +34,19 @@ const schema = yup.object().shape({
     content: yup.string().required('Message is required'),
 });
 
-const NewChat: React.FC<{ handleSelectRoom: (room: ChatRoom | null) => void }> = ({
-    handleSelectRoom,
-}) => {
+const NewChat: React.FC<{
+    handleSelectRoom: (room: ChatRoom | null, initialContent?: string) => void;
+}> = ({ handleSelectRoom }) => {
     const {
         data: providers,
         isSuccess: isProvidersSuccess,
         isLoading: isProvidersLoading,
     } = useGetProvidersQuery();
 
-    const [createCompletion, { isLoading: isCreating }] = useCreateCompletionMutation();
+    const [createCompletion] = useCreateCompletionMutation();
+    const [createRoom, { isLoading: isCreating }] = useCreateChatRoomMutation();
     const [getModels, { isFetching: isModelsFetching }] = useLazyGetModelsQuery();
+    const [createCompletionStreaming] = useCreateCompletionStreamingMutation();
     const [models, setModels] = useState<string[]>([]);
     const [completionError, setCompletionError] = useState<string | undefined>();
 
@@ -51,11 +55,15 @@ const NewChat: React.FC<{ handleSelectRoom: (room: ChatRoom | null) => void }> =
         { setSubmitting }: { setSubmitting: (isSubmitting: boolean) => void }
     ) => {
         try {
-            const { data, error } = await createCompletion(values);
+            const { data: room, error } = await createRoom({
+                model_id: values.model,
+                provider: values.provider,
+                system_prompt: values.systemPrompt,
+                title: values.systemPrompt.slice(0, 51),
+            });
 
             if (error) {
                 let errorMessage = 'An unknown error occurred';
-
                 if ('data' in error && typeof error.data === 'object') {
                     const errorData = error.data || {};
                     errorMessage = Object.entries(errorData)
@@ -66,16 +74,15 @@ const NewChat: React.FC<{ handleSelectRoom: (room: ChatRoom | null) => void }> =
                         )
                         .join('\n');
                 }
-
                 setCompletionError(errorMessage);
                 return;
             }
 
-            if (data && 'chatroom' in data) {
-                handleSelectRoom(data.chatroom);
-            }
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            // Pass the initial content to handleSelectRoom
+            handleSelectRoom(room, values.content);
         } catch (err) {
+            console.error(err);
+
             setCompletionError('An unexpected error occurred. Please try again.');
         } finally {
             setSubmitting(false);

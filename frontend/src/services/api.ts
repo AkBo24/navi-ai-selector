@@ -10,8 +10,8 @@ export type User = {
 export type ChatRoom = {
     id?: string;
     title: string;
-    created_at: string;
-    updated_at: string;
+    created_at?: string;
+    updated_at?: string;
     provider: Provider;
     model_id: string;
     system_prompt: string;
@@ -59,6 +59,14 @@ export const api = createApi({
             query: (id) => `chatrooms/${id}`,
             providesTags: (result, error, id) => [{ type: 'chat-room', id }],
         }),
+        createChatRoom: builder.mutation<ChatRoom, ChatRoom>({
+            query: (body) => ({
+                url: `chatrooms`,
+                method: 'POST',
+                body,
+            }),
+            invalidatesTags: ['chat-rooms'],
+        }),
         updateChatRoom: builder.mutation<Partial<ChatRoom>, Partial<ChatRoom>>({
             query: ({ id, ...body }) => ({
                 url: `chatrooms/${id}`,
@@ -75,7 +83,7 @@ export const api = createApi({
                 url: `chatrooms/${id}`,
                 method: 'DELETE',
             }),
-            invalidatesTags: ['chat-room', 'messages'],
+            invalidatesTags: ['chat-room', 'messages', 'chat-rooms'],
         }),
         getChatRoomMessages: builder.query<Message2[], string>({
             query: (id) => `chatrooms/${id}/messages`,
@@ -249,6 +257,7 @@ export const {
     useGetChatroomsQuery,
     useGetChatRoomQuery,
     useGetChatRoomMessagesQuery,
+    useCreateChatRoomMutation,
     useUpdateChatRoomMutation,
     useDeleteChatRoomMutation,
     useLazyGetModelsQuery,

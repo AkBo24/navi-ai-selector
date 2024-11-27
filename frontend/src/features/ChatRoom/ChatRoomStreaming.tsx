@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Box,
     Paper,
@@ -22,12 +22,17 @@ const schema = yup.object().shape({
     content: yup.string().required('Message cannot be empty'),
 });
 
-const ChatRoomStreaming: React.FC<{ roomId: string }> = ({ roomId }) => {
+const ChatRoomStreaming: React.FC<{
+    roomId: string;
+    initialContent?: string;
+    clearInitialContent: () => void;
+}> = ({ roomId, initialContent, clearInitialContent }) => {
     const { data: room, isSuccess } = useGetChatRoomQuery(roomId);
     const { data: messages, isSuccess: isMessagesSuccess } =
         useGetChatRoomMessagesQuery(roomId);
     const [createCompletionStreaming] = useCreateCompletionStreamingMutation();
     const [isStreaming, setIsStreaming] = useState(false);
+    const [hasSentInitialMessage, setHasSentInitialMessage] = useState(false);
 
     // Reference to messages container for auto-scrolling
     const messagesEndRef = React.useRef<HTMLDivElement>(null);
@@ -37,9 +42,40 @@ const ChatRoomStreaming: React.FC<{ roomId: string }> = ({ roomId }) => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     };
 
-    React.useEffect(() => {
+    useEffect(() => {
         scrollToBottom();
     }, [messages]);
+
+    useEffect(() => {
+        if (isSuccess && initialContent && !hasSentInitialMessage) {
+            const sendInitialMessage = async () => {
+                try {
+                    setIsStreaming(true);
+                    await createCompletionStreaming({
+                        model: room.model_id,
+                        provider: room.provider,
+                        systemPrompt: room.system_prompt,
+                        content: initialContent,
+                        id: room.id,
+                    });
+                    setHasSentInitialMessage(true);
+                    clearInitialContent();
+                } catch (error) {
+                    console.error('Streaming error:', error);
+                } finally {
+                    setIsStreaming(false);
+                }
+            };
+
+            sendInitialMessage();
+        }
+    }, [
+        isSuccess,
+        initialContent,
+        hasSentInitialMessage,
+        createCompletionStreaming,
+        clearInitialContent,
+    ]);
 
     const handleSubmit = async (
         values: { content: string },
