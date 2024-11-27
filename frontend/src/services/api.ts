@@ -7,12 +7,15 @@ export type User = {
     email?: string;
 };
 
-export type Todo = {
+export type ChatRoom = {
     id?: number;
     title: string;
-    description: string;
-    completed: boolean;
-    owner?: User;
+    created_at: string;
+    updated_at: string;
+    provider: Provider;
+    model_id: string[];
+    system_prompt: string;
+    messages: Message2[];
 };
 
 export type Prompt = {
@@ -25,6 +28,17 @@ export type Prompt = {
 export type Message = {
     from: 'user' | 'provider';
     content: string;
+};
+
+export type Role = 'system' | 'user' | 'assistant';
+
+export type Message2 = {
+    id?: number;
+    role: Role;
+    content: string;
+    created_at: string;
+    input_tokens: number;
+    output_tokens: number;
 };
 
 export const api = createApi({
@@ -43,11 +57,14 @@ export const api = createApi({
             query: () => `auth/jwt/create`,
             invalidatesTags: ['user'],
         }),
+        getChatrooms: builder.query<ChatRoom[], void>({
+            query: () => `chatrooms`,
+        }),
         getProviders: builder.query<Provider[], void>({
             query: () => `providers`,
         }),
         getModels: builder.query<string[], Provider>({
-            query: (provider) => `providers/${provider}/models`,
+            query: (provider) => `providers/${provider.toLowerCase()}/models`,
             providesTags: ['models'],
         }),
         createCompletion: builder.mutation<any, Prompt>({
@@ -60,36 +77,13 @@ export const api = createApi({
                 },
             }),
         }),
-        getTodos: builder.query<Todo[], void>({
-            query: () => `todos`,
-            providesTags: ['todos'],
-        }),
-        addTodo: builder.mutation<Todo, Partial<Todo>>({
-            query: (body) => ({
-                url: `todos`,
-                method: 'POST',
-                body: body,
-            }),
-            invalidatesTags: ['todos'],
-        }),
-        updateTodo: builder.mutation<Todo, Partial<Todo> & Pick<Todo, 'id'>>({
-            // note: an optional `queryFn` may be used in place of `query`
-            query: ({ id, ...patch }) => ({
-                url: `todos/${id}`,
-                method: 'PATCH',
-                body: patch,
-            }),
-            invalidatesTags: ['todos'],
-        }),
     }),
 });
 
 export const {
     useCheckAuthQuery,
     useGetProvidersQuery,
+    useGetChatroomsQuery,
     useLazyGetModelsQuery,
     useCreateCompletionMutation,
-    useGetTodosQuery,
-    useAddTodoMutation,
-    useUpdateTodoMutation,
 } = api;

@@ -30,6 +30,7 @@ const AiProvider = () => {
     const { data: providers, isSuccess, isLoading } = useGetProvidersQuery();
     const [createCompletion] = useCreateCompletionMutation();
     const [trigger] = useLazyGetModelsQuery();
+    const [isModelLoading, setIsModelLoading] = useState<boolean>(false);
     const [models, setModels] = useState<string[]>([]);
     const [messages, setMessages] = useState<Message[]>([]);
     const [completionError, setCompletionError] = useState<string | undefined>();
@@ -118,10 +119,12 @@ const AiProvider = () => {
                                         setModels([]);
                                     } else {
                                         setFieldValue('provider', value);
+                                        setIsModelLoading(true);
+                                        setFieldValue('model', '');
                                         const { data, isSuccess } = await trigger(value);
                                         if (isSuccess) {
                                             setModels(data);
-                                            setFieldValue('model', '');
+                                            setIsModelLoading(false);
                                         }
                                     }
                                 }}
@@ -129,7 +132,6 @@ const AiProvider = () => {
                                 noOptionsText='No providers found'
                             />
 
-                            {/* Model Autocomplete */}
                             <Autocomplete
                                 options={models}
                                 getOptionLabel={(option) => option || ''}
@@ -144,6 +146,8 @@ const AiProvider = () => {
                                 fullWidth
                                 onChange={(e, value) => setFieldValue('model', value)}
                                 noOptionsText='Choose a model'
+                                disabled={isModelLoading}
+                                value={values.model}
                             />
                         </Box>
 

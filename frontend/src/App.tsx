@@ -9,8 +9,13 @@ import {
     ListItemText,
 } from '@mui/material';
 import AiProvider from './features/AiProvider/AiProvider';
+import { useGetChatroomsQuery } from './services/api';
 
 const App: React.FC = () => {
+    const { data: chats, isSuccess } = useGetChatroomsQuery();
+    console.log(`Chats`);
+    console.log(chats);
+
     const [isNewChat, setIsNewChat] = useState(false); // Tracks whether the user is starting a new chat
     const [currentChat, setCurrentChat] = useState<string | null>(null); // Tracks the selected chat
 
@@ -54,14 +59,15 @@ const App: React.FC = () => {
                         New Chat
                     </Button>
                     <List>
-                        {['Chat 1', 'Chat 2', 'Chat 3'].map((text, index) => (
-                            <ListItem
-                                component={Button}
-                                key={index}
-                                onClick={() => handleSelectChat(text)}>
-                                <ListItemText primary={text} />
-                            </ListItem>
-                        ))}
+                        {isSuccess &&
+                            chats.map(({ title }, index) => (
+                                <ListItem
+                                    key={index}
+                                    component={Button}
+                                    onClick={() => handleSelectChat(title)}>
+                                    <ListItemText primary={title} />
+                                </ListItem>
+                            ))}
                     </List>
                 </Box>
             </Drawer>
