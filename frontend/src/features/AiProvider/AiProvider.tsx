@@ -15,14 +15,14 @@ import {
     useLazyGetModelsQuery,
 } from '../../services/api';
 import { Formik } from 'formik';
-import * as yup from 'yup';
-import Message from './components/Message';
 import { FetchBaseQueryError } from '@reduxjs/toolkit/query';
+import * as yup from 'yup';
+import FormikTextField from '../../components/FormikTextField';
 
 const schema = yup.object<Prompt>({
     provider: yup.string().oneOf(['Anthropic', 'OpenAI']).required('Required'),
     model: yup.string().required('Required'),
-    systemPrompt: yup.string(),
+    systemPrompt: yup.string().required('Required'),
     message: yup.string().required('Required'),
 });
 
@@ -32,12 +32,11 @@ const AiProvider = () => {
     const [trigger] = useLazyGetModelsQuery();
     const [isModelLoading, setIsModelLoading] = useState<boolean>(false);
     const [models, setModels] = useState<string[]>([]);
-    const [messages, setMessages] = useState<Message[]>([]);
     const [completionError, setCompletionError] = useState<string | undefined>();
 
     const handleSubmit = async (values: Prompt) => {
         try {
-            const { data, error } = await createCompletion(values);
+            const { error } = await createCompletion(values);
 
             if (error) {
                 // Extract and format error messages from FetchBaseQueryError
@@ -58,18 +57,7 @@ const AiProvider = () => {
                 setCompletionError(errorMessage);
                 return;
             }
-            // Update messages on successful response
-            setMessages((prev) => [
-                ...prev,
-                { from: 'user', content: values.message },
-                {
-                    from: 'provider',
-                    content:
-                        values.provider === 'OpenAi'
-                            ? data.choices[0].message.content
-                            : data.content,
-                },
-            ]);
+
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (err: unknown) {
             setCompletionError('An unexpected error occurred. Please try again.');
@@ -85,7 +73,7 @@ const AiProvider = () => {
                     provider: '',
                     model: '',
                     systemPrompt: '',
-                    message: '',
+                    content: '',
                 }}>
                 {({
                     values,
@@ -97,7 +85,6 @@ const AiProvider = () => {
                 }) => (
                     <Container>
                         <Box display='flex' gap={2} mb={2}>
-                            {/* Provider Autocomplete */}
                             <Autocomplete
                                 options={isSuccess ? providers : []}
                                 getOptionLabel={(option) => option || ''}
@@ -105,14 +92,13 @@ const AiProvider = () => {
                                     <TextField
                                         {...params}
                                         label='Provider'
-                                        error={
-                                            touched.provider && Boolean(errors.provider)
-                                        }
-                                        helperText={touched.provider && errors.provider}
+                                        error={errors.provider != undefined}
+                                        helperText={errors.provider}
                                     />
                                 )}
                                 fullWidth
                                 onChange={async (e, value) => {
+                                    console.log(`${value}`);
                                     if (!value) {
                                         setFieldValue('provider', '');
                                         setFieldValue('model', '');
@@ -139,8 +125,8 @@ const AiProvider = () => {
                                     <TextField
                                         {...params}
                                         label='Model'
-                                        error={touched.model && Boolean(errors.model)}
-                                        helperText={touched.model && errors.model}
+                                        error={errors.model != undefined}
+                                        helperText={errors.model}
                                     />
                                 )}
                                 fullWidth
@@ -151,42 +137,23 @@ const AiProvider = () => {
                             />
                         </Box>
 
-                        {/* <Box
-                            display='flex'
-                            flexDirection='column'
-                            sx={{ maxHeight: 400, overflowY: 'auto', mb: 2 }}>
-                            {messages.map((m, i) => (
-                                <Message message={m} key={i} />
-                            ))}
-                        </Box> */}
-
                         <Box display='flex' flexDirection='column' gap={2}>
-                            <TextField
-                                id='system-prompt'
+                            <FormikTextField
                                 name='systemPrompt'
                                 label='System Prompt'
                                 variant='outlined'
-                                value={values.systemPrompt}
-                                onChange={handleChange}
-                                fullWidth
                             />
-                            <TextField
-                                id='message'
+
+                            <FormikTextField
                                 name='message'
                                 label='Message'
                                 variant='outlined'
-                                value={values.message}
-                                onChange={handleChange}
-                                error={touched.message && Boolean(errors.message)}
-                                helperText={touched.message && errors.message}
-                                fullWidth
                             />
+
                             <Button
                                 type='submit'
                                 variant='contained'
-                                onClick={() => {
-                                    if (Object.keys(errors).length === 0) submitForm();
-                                }}>
+                                onClick={submitForm}>
                                 Send
                             </Button>
                         </Box>

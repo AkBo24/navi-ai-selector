@@ -8,12 +8,12 @@ export type User = {
 };
 
 export type ChatRoom = {
-    id?: number;
+    id?: string;
     title: string;
     created_at: string;
     updated_at: string;
     provider: Provider;
-    model_id: string[];
+    model_id: string;
     system_prompt: string;
     messages: Message2[];
 };
@@ -22,7 +22,7 @@ export type Prompt = {
     provider: Provider;
     model: string;
     systemPrompt: string;
-    message: string;
+    content: string;
 };
 
 export type Message = {
@@ -67,13 +67,14 @@ export const api = createApi({
             query: (provider) => `providers/${provider.toLowerCase()}/models`,
             providesTags: ['models'],
         }),
-        createCompletion: builder.mutation<ChatRoom, Prompt>({
-            query: ({ provider, model, systemPrompt, message }) => ({
+        createCompletion: builder.mutation<ChatRoom, Prompt & { id?: string }>({
+            query: ({ provider, model, systemPrompt, content, id }) => ({
                 url: `/providers/${provider.toLowerCase()}/models/${model.toLowerCase()}/complete`,
                 method: 'POST',
                 body: {
                     system_prompt: systemPrompt,
-                    message,
+                    content,
+                    id,
                 },
             }),
         }),

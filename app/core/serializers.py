@@ -26,6 +26,6 @@ class ChatRoomSerializer(serializers.ModelSerializer):
         read_only_fields = ['created_at', 'updated_at']
 
 class CompletionSerializer(serializers.Serializer):
-    chatroom_id = serializers.IntegerField(required=False)
+    chatroom_id = serializers.UUIDField(required=False)
     system_prompt = serializers.CharField(required=False, allow_blank=True)
     message = serializers.CharField()
