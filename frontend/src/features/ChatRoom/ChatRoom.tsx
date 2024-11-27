@@ -11,7 +11,7 @@ import * as yup from 'yup';
 import FormikTextField from '../../components/FormikTextField';
 
 const schema = yup.object().shape({
-    content: yup.string().required('Required'),
+    content: yup.string(),
 });
 
 const ChatRoom: React.FC<{ roomId: string }> = ({ roomId }) => {
@@ -24,8 +24,7 @@ const ChatRoom: React.FC<{ roomId: string }> = ({ roomId }) => {
         values: { content: string },
         { resetForm }: { resetForm: () => void }
     ) => {
-        if (room == null) return;
-        console.log('Submitted:', values);
+        if (room == null || values.content.length === 0) return;
 
         createCompletion({
             model: room.model_id,
