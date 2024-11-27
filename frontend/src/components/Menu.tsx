@@ -13,6 +13,11 @@ import {
     MenuItem,
     Divider,
     ListItemIcon,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    TextField,
 } from '@mui/material';
 import {
     MoreVert,
@@ -24,7 +29,10 @@ import {
     ChatRoom,
     useDeleteChatRoomMutation,
     useGetChatroomsQuery,
+    useUpdateChatRoomMutation,
 } from '../services/api';
+import { useFormik } from 'formik';
+import * as yup from 'yup';
 
 const drawerWidth = 240;
 
@@ -45,8 +53,11 @@ const Menu: React.FC<MenuProps> = ({
 }) => {
     const { data: chats, isSuccess } = useGetChatroomsQuery();
     const [deleteRoom] = useDeleteChatRoomMutation();
+    const [updateRoom] = useUpdateChatRoomMutation();
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const [menuRoom, setMenuRoom] = useState<ChatRoom | null>(null);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [editRoom, setEditRoom] = useState<ChatRoom | null>(null);
 
     const handleMenuOpen = (
         event: React.MouseEvent<HTMLElement>,
@@ -64,16 +75,39 @@ const Menu: React.FC<MenuProps> = ({
 
     const handleEditChat = (room: ChatRoom) => {
         handleMenuClose();
-        handleSelectRoom(null);
+        setEditRoom(room);
+        setIsEditModalOpen(true);
     };
 
     const handleDeleteChat = async (room: ChatRoom) => {
         if (room.id) {
             await deleteRoom(room.id);
-            handleSelectRoom(null);
+            // If the deleted room was selected, deselect it
+            if (room?.id === room.id) {
+                handleSelectRoom(null);
+            }
         }
         handleMenuClose();
     };
+
+    // Formik for the edit form
+    const validationSchema = yup.object({
+        title: yup.string().required('Title is required'),
+    });
+
+    const formik = useFormik({
+        initialValues: {
+            title: editRoom?.title || '',
+        },
+        enableReinitialize: true, // Reinitialize when editRoom changes
+        validationSchema: validationSchema,
+        onSubmit: async (values) => {
+            if (editRoom && editRoom.id) {
+                await updateRoom({ id: editRoom.id, title: values.title });
+                setIsEditModalOpen(false);
+            }
+        },
+    });
 
     const drawerContent = (
         <Box sx={{ overflow: 'auto' }}>
@@ -147,40 +181,80 @@ const Menu: React.FC<MenuProps> = ({
     );
 
     return (
-        <Box
-            component='nav'
-            sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
-            aria-label='mailbox folders'>
-            <Drawer
-                variant='temporary'
-                open={mobileOpen}
-                onClose={handleDrawerToggle}
-                ModalProps={{
-                    keepMounted: true,
-                }}
-                sx={{
-                    display: { xs: 'block', sm: 'none' },
-                    '& .MuiDrawer-paper': {
-                        boxSizing: 'border-box',
-                        width: drawerWidth,
-                    },
-                }}>
-                {drawerContent}
-            </Drawer>
+        <>
+            {/* Navigation Drawer */}
+            <Box
+                component='nav'
+                sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
+                aria-label='mailbox folders'>
+                {/* Temporary drawer for mobile */}
+                <Drawer
+                    variant='temporary'
+                    open={mobileOpen}
+                    onClose={handleDrawerToggle}
+                    ModalProps={{
+                        keepMounted: true,
+                    }}
+                    sx={{
+                        display: { xs: 'block', sm: 'none' },
+                        '& .MuiDrawer-paper': {
+                            boxSizing: 'border-box',
+                            width: drawerWidth,
+                        },
+                    }}>
+                    {drawerContent}
+                </Drawer>
+                {/* Permanent drawer for desktop */}
+                <Drawer
+                    variant='permanent'
+                    sx={{
+                        display: { xs: 'none', sm: 'block' },
+                        '& .MuiDrawer-paper': {
+                            boxSizing: 'border-box',
+                            width: drawerWidth,
+                        },
+                    }}
+                    open>
+                    {drawerContent}
+                </Drawer>
+            </Box>
 
-            <Drawer
-                variant='permanent'
-                sx={{
-                    display: { xs: 'none', sm: 'block' },
-                    '& .MuiDrawer-paper': {
-                        boxSizing: 'border-box',
-                        width: drawerWidth,
-                    },
-                }}
-                open>
-                {drawerContent}
-            </Drawer>
-        </Box>
+            {/* Edit Chat Room Modal */}
+            <Dialog
+                open={isEditModalOpen}
+                onClose={() => setIsEditModalOpen(false)}
+                fullWidth
+                maxWidth='sm'>
+                <DialogTitle>Edit Chat Room</DialogTitle>
+                <DialogContent>
+                    <form onSubmit={formik.handleSubmit}>
+                        <TextField
+                            autoFocus
+                            margin='dense'
+                            name='title'
+                            label='Chat Room Title'
+                            type='text'
+                            fullWidth
+                            value={formik.values.title}
+                            onChange={formik.handleChange}
+                            error={formik.touched.title && Boolean(formik.errors.title)}
+                            helperText={formik.touched.title && formik.errors.title}
+                        />
+                    </form>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setIsEditModalOpen(false)} color='primary'>
+                        Cancel
+                    </Button>
+                    <Button
+                        onClick={formik.submitForm}
+                        color='primary'
+                        variant='contained'>
+                        Save
+                    </Button>
+                </DialogActions>
+            </Dialog>
+        </>
     );
 };
 

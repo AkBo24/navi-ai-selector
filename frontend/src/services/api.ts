@@ -53,11 +53,22 @@ export const api = createApi({
         }),
         getChatrooms: builder.query<ChatRoom[], void>({
             query: () => `chatrooms`,
-            providesTags: ['chat-rooms', 'messages'],
+            providesTags: ['chat-rooms'],
         }),
         getChatRoom: builder.query<ChatRoom, string>({
             query: (id) => `chatrooms/${id}`,
-            providesTags: ['chat-room'],
+            providesTags: (result, error, id) => [{ type: 'chat-room', id }],
+        }),
+        updateChatRoom: builder.mutation<Partial<ChatRoom>, Partial<ChatRoom>>({
+            query: ({ id, ...body }) => ({
+                url: `chatrooms/${id}`,
+                method: 'PATCH',
+                body,
+            }),
+            invalidatesTags: (result, error, { id }) => [
+                { type: 'chat-room', id },
+                'chat-rooms',
+            ],
         }),
         deleteChatRoom: builder.mutation<void, string>({
             query: (id) => ({
@@ -238,6 +249,7 @@ export const {
     useGetChatroomsQuery,
     useGetChatRoomQuery,
     useGetChatRoomMessagesQuery,
+    useUpdateChatRoomMutation,
     useDeleteChatRoomMutation,
     useLazyGetModelsQuery,
     useCreateCompletionMutation,
