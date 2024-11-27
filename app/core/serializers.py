@@ -18,11 +18,11 @@ class MessageSerializer(serializers.ModelSerializer):
         read_only_fields = ['input_tokens', 'output_tokens']
 
 class ChatRoomSerializer(serializers.ModelSerializer):
-    messages = MessageSerializer(many=True, read_only=True)
+    # messages = MessageSerializer(many=True, read_only=True)
     
     class Meta:
         model = ChatRoom
-        fields = ['id', 'title', 'created_at', 'updated_at', 'provider', 'model_id', 'system_prompt', 'messages']
+        fields = ['id', 'title', 'created_at', 'updated_at', 'provider', 'model_id', 'system_prompt']
         read_only_fields = ['created_at', 'updated_at']
     
 class MessageRequestSerializer(serializers.Serializer):

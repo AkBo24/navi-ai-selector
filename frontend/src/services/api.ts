@@ -15,18 +15,12 @@ export type ChatRoom = {
     provider: Provider;
     model_id: string;
     system_prompt: string;
-    messages: Message2[];
 };
 
 export type Prompt = {
     provider: Provider;
     model: string;
     systemPrompt: string;
-    content: string;
-};
-
-export type Message = {
-    from: 'user' | 'provider';
     content: string;
 };
 
@@ -61,12 +55,20 @@ export const api = createApi({
             query: () => `chatrooms`,
             providesTags: ['chat-rooms', 'messages'],
         }),
+        getChatRoom: builder.query<ChatRoom, string>({
+            query: (id) => `chatrooms/${id}`,
+            providesTags: ['chat-room'],
+        }),
         deleteChatRoom: builder.mutation<void, string>({
             query: (id) => ({
                 url: `chatrooms/${id}`,
                 method: 'DELETE',
             }),
             invalidatesTags: ['chat-rooms', 'messages'],
+        }),
+        getChatRoomMessages: builder.query<Message2[], string>({
+            query: (id) => `chatrooms/${id}/messages`,
+            providesTags: ['messages'],
         }),
         getProviders: builder.query<Provider[], void>({
             query: () => `providers`,
@@ -97,6 +99,8 @@ export const {
     useCheckAuthQuery,
     useGetProvidersQuery,
     useGetChatroomsQuery,
+    useGetChatRoomQuery,
+    useGetChatRoomMessagesQuery,
     useDeleteChatRoomMutation,
     useLazyGetModelsQuery,
     useCreateCompletionMutation,

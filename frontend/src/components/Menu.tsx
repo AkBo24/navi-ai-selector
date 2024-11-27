@@ -20,7 +20,7 @@ import {
 import { MoreHoriz } from '@mui/icons-material';
 
 const Menu: React.FC<{
-    room: ChatRoom;
+    room: ChatRoom | null;
     handleNewRoom: () => void;
     handleSelectRoom: (room: ChatRoom) => void;
 }> = ({ room, handleNewRoom: handleNewChat, handleSelectRoom: handleSelectChat }) => {
@@ -84,7 +84,7 @@ const Menu: React.FC<{
                         chats.map((r, i) => (
                             <ListItemButton
                                 onClick={() => handleSelectChat(r)}
-                                selected={room && r?.id === room?.id} // Highlight the selected chat
+                                selected={room != null && r?.id === room?.id} // Highlight the selected chat
                                 key={r.id || i}>
                                 <ListItemText primary={r.title} />
                                 <Tooltip arrow color='primary' placement='left' title=''>

@@ -36,7 +36,7 @@ const App: React.FC = () => {
                 {isNewRoom ? (
                     <AiProvider handleSelectRoom={handleSelectRoom} />
                 ) : currentRoom ? (
-                    <ChatRoom room={currentRoom} />
+                    <ChatRoom roomId={currentRoom.id || ''} />
                 ) : (
                     <Typography sx={{ p: 2 }}>
                         Select a chat or start a new one.

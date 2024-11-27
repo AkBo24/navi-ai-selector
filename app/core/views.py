@@ -1,16 +1,32 @@
 from rest_framework import viewsets, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.decorators import action
 from drf_spectacular.utils import extend_schema
 from .serializers import ChatRoomSerializer, MessageSerializer, CompletionSerializer
 from .models import ChatRoom, Message
+
 from openai import OpenAI
 from anthropic import Anthropic
+
 import os
 
 class ChatRoomViewSet(viewsets.ModelViewSet):
     queryset = ChatRoom.objects.all()
     serializer_class = ChatRoomSerializer
+
+    @action(detail=True, methods=['get'])
+    def messages(self, request, pk=None):
+        try:
+            chatroom = self.get_object()
+            messages = chatroom.messages.all()
+            serializer = MessageSerializer(messages, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except ChatRoom.DoesNotExist:
+            return Response(
+                {'error': 'Chatroom not found'}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
 
 class ProviderListView(APIView):
     def get(self, request):

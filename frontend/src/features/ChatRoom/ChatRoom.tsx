@@ -1,8 +1,8 @@
 import { Box, Typography } from '@mui/material';
 import {
-    Prompt,
-    Role,
     useCreateCompletionMutation,
+    useGetChatRoomMessagesQuery,
+    useGetChatRoomQuery,
     type ChatRoom,
 } from '../../services/api';
 import { Formik } from 'formik';
@@ -14,73 +14,81 @@ const schema = yup.object().shape({
     content: yup.string().required('Required'),
 });
 
-const ChatRoom: React.FC<{ room: ChatRoom }> = ({
-    room: { title, messages, system_prompt, model_id, provider, id },
-}) => {
+const ChatRoom: React.FC<{ roomId: string }> = ({ roomId }) => {
+    const { data: room, isSuccess } = useGetChatRoomQuery(roomId);
+    const { data: messages, isSuccess: isMessagesSuccess } =
+        useGetChatRoomMessagesQuery(roomId);
     const [createCompletion] = useCreateCompletionMutation();
-    const prompt: Omit<Prompt, 'content'> = {
-        model: model_id,
-        provider,
-        systemPrompt: system_prompt,
-    };
-    console.log(messages);
+    // const prompt: Omit<Prompt, 'content'> = {
+    //     model: model_id,
+    //     provider,
+    //     systemPrompt: system_prompt,
+    // };
 
     const handleSubmit = (
         values: { content: string },
         { resetForm }: { resetForm: () => void }
     ) => {
+        if (room == null) return;
         console.log('Submitted:', values);
 
         createCompletion({
-            ...prompt,
+            model: room.model_id,
+            provider: room.provider,
+            systemPrompt: room.system_prompt,
             content: values.content,
-            id,
+            id: room.id,
         });
         resetForm();
     };
 
     return (
-        <>
-            <Box
-                sx={{
-                    flexGrow: 1,
-                    overflow: 'auto',
-                    border: '1px solid #ccc',
-                    borderRadius: 1,
-                    p: 2,
-                }}>
-                <Typography variant='h4' sx={{ mb: 2 }}>
-                    {title}
-                </Typography>
-                {messages.map((m) => m.role != 'system' && <Message message={m} />)}
-            </Box>
-            <Formik
-                initialValues={{ content: '' }}
-                validationSchema={schema}
-                onSubmit={handleSubmit}>
-                {({ submitForm }) => (
-                    <Box
-                        component='form'
-                        onSubmit={(e) => {
-                            e.preventDefault();
-                            submitForm();
-                        }}>
-                        <FormikTextField
-                            name='content'
-                            label='content'
-                            variant='outlined'
-                            onKeyDown={(e) => {
-                                if (e.key === 'Enter') {
-                                    e.preventDefault();
-                                    submitForm();
-                                }
-                            }}
-                            fullWidth
-                        />
-                    </Box>
-                )}
-            </Formik>
-        </>
+        isSuccess && (
+            <>
+                <Box
+                    sx={{
+                        flexGrow: 1,
+                        overflow: 'auto',
+                        border: '1px solid #ccc',
+                        borderRadius: 1,
+                        p: 2,
+                    }}>
+                    <Typography variant='h4' sx={{ mb: 2 }}>
+                        {room.title}
+                    </Typography>
+                    {isMessagesSuccess &&
+                        messages.map(
+                            (m) => m.role != 'system' && <Message message={m} />
+                        )}
+                </Box>
+                <Formik
+                    initialValues={{ content: '' }}
+                    validationSchema={schema}
+                    onSubmit={handleSubmit}>
+                    {({ submitForm }) => (
+                        <Box
+                            component='form'
+                            onSubmit={(e) => {
+                                e.preventDefault();
+                                submitForm();
+                            }}>
+                            <FormikTextField
+                                name='content'
+                                label='content'
+                                variant='outlined'
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                        e.preventDefault();
+                                        submitForm();
+                                    }
+                                }}
+                                fullWidth
+                            />
+                        </Box>
+                    )}
+                </Formik>
+            </>
+        )
     );
 };
 
