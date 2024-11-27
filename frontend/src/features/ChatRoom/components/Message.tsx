@@ -1,9 +1,9 @@
 import React from 'react';
-import type { Message } from '../../../services/api';
+import type { Message2 } from '../../../services/api';
 import { Box, BoxProps, Typography } from '@mui/material';
 
-const Message: React.FC<{ message: Message }> = ({ message }) => {
-    const isUser = message.from === 'user';
+const Message: React.FC<{ message: Message2 }> = ({ message }) => {
+    const isUser = message.role === 'user';
     const options: BoxProps = {
         sx: {
             maxWidth: '70%',
