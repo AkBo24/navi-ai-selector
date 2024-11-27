@@ -4,7 +4,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .serializers import CompletionSerializer
-from drf_spectacular.utils import extend_schema 
+from drf_spectacular.utils import extend_schema
+from anthropic import Anthropic
 
 import os
 import requests
@@ -44,22 +45,32 @@ class ModelListView(APIView):
             return {'error': str(e)}
 
     def get_anthropic_models(self):
-        # Placeholder for the actual Anthropic API call
-        """ Something like…
-        headers = {
-            'x-api-key': os.getenv('ANTHROPIC_API_KEY')
-        }
-        try:
-            # Placeholder Anthropic endpoint
-            response = requests.get('https://api.anthropic.com/v1/models', headers=headers)
-            response.raise_for_status()
-            data = response.json()
-            models = [model['name'] for model in data.get('models', [])]
-            return models
-        except requests.exceptions.RequestException as e:
-            return {'error': str(e)}
         """
-        return {'error': 'NOT IMPLEMENTED'}
+        Returns a list of available Anthropic model IDs.
+        Since Anthropic doesn't provide a models endpoint, this returns
+        the current set of available models.
+        
+        Returns:
+            list: Available model IDs or dict with error message
+        """
+        try:
+            # Current Claude 3 models
+            models = [
+                "claude-3-opus-20240229",
+                "claude-3-sonnet-20240229",
+                "claude-3-haiku-20240307"
+            ]
+            
+            # Verify API key exists (optional validation)
+            if not os.getenv("ANTHROPIC_API_KEY"):
+                return {'error': 'ANTHROPIC_API_KEY not found in environment variables'}
+                
+            return models
+            
+        except Exception as e:
+            return {'error': str(e)}
+
+
 
 class CompletionView(APIView):
     @extend_schema(
@@ -132,23 +143,44 @@ class CompletionView(APIView):
             return {'error': str(e)}
 
     def anthropic_completion(self, model_id, system_prompt, message):
-        # Implement the actual Anthropic completion logic based on their API
-        """ something like…        
-        headers = {
-            'x-api-key': os.getenv('ANTHROPIC_API_KEY'),
-            'Content-Type': 'application/json'
-        }
-        payload = {
-            'model': model_id,
-            'prompt': f"{system_prompt}\n{message}",
-            'max_tokens_to_sample': 150,
-        }
-        try:
-            response = requests.post('https://api.anthropic.com/v1/complete', headers=headers, json=payload)
-            response.raise_for_status()
-            data = response.json()
-            return data  # Format as needed
-        except requests.exceptions.RequestException as e:
-            return {'error': str(e)}
         """
-        return {'error': 'NOT IMPLEMENTED'}
+        Create a completion using the Anthropic API.
+        
+        Args:
+            model_id (str): The Anthropic model ID to use (e.g., "claude-3-opus-20240229")
+            system_prompt (str): The system prompt to set context
+            message (str): The user's message to generate a completion for
+        
+        Returns:
+            dict: The API response data or error message
+        """
+        try:
+            client = Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+            
+            response = client.messages.create(
+                model=model_id,
+                system=system_prompt,  # System prompt as a separate parameter
+                max_tokens=1000,
+                messages=[
+                    {
+                        "role": "user",
+                        "content": message
+                    }
+                ]
+            )
+            
+            # TODO: May need to format
+            formatted_response = {
+                'id': response.id,
+                'model': response.model,
+                'content': response.content[0].text,
+                'usage': {
+                    'input_tokens': response.usage.input_tokens,
+                    'output_tokens': response.usage.output_tokens
+                },
+                'finish_reason': response.stop_reason
+            }
+            
+            return formatted_response
+        except Exception as e:
+            return {'error': str(e)}

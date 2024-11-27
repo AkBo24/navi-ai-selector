@@ -61,7 +61,13 @@ const AiProvider = () => {
             setMessages((prev) => [
                 ...prev,
                 { from: 'user', content: values.message },
-                { from: 'provider', content: data.choices[0].message.content },
+                {
+                    from: 'provider',
+                    content:
+                        values.provider === 'OpenAi'
+                            ? data.choices[0].message.content
+                            : data.content,
+                },
             ]);
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (err: unknown) {
