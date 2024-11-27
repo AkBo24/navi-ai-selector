@@ -1,26 +1,45 @@
 import React from 'react';
-import type { Message2 } from '../../../services/api';
-import { Box, BoxProps, Typography } from '@mui/material';
+import { Box, Avatar, Typography, Paper } from '@mui/material';
+import { Fade } from '@mui/material';
 
-const Message: React.FC<{ message: Message2 }> = ({ message }) => {
+const Message: React.FC<{ message: { role: string; content: string } }> = ({
+    message,
+}) => {
     const isUser = message.role === 'user';
-    const options: BoxProps = {
-        sx: {
-            maxWidth: '70%',
-            padding: 1,
-            borderRadius: 1,
-            backgroundColor: isUser ? 'green.100' : 'blue.100',
-            color: isUser ? 'green' : 'blue.900',
-            alignSelf: isUser ? 'flex-end' : '',
-            marginBottom: 1,
-            background: isUser ? 'wheat' : '',
-        },
-    };
 
     return (
-        <Box {...options}>
-            <Typography>{message.content}</Typography>
-        </Box>
+        <Fade in timeout={300}>
+            <Box
+                sx={{
+                    display: 'flex',
+                    flexDirection: isUser ? 'row-reverse' : 'row',
+                    alignItems: 'flex-start',
+                    marginBottom: 2,
+                }}>
+                {/* Avatar */}
+                <Avatar
+                    sx={{
+                        backgroundColor: isUser ? 'green' : 'blue',
+                        marginLeft: isUser ? 2 : 0,
+                        marginRight: isUser ? 0 : 2,
+                    }}>
+                    {isUser ? 'U' : 'A'}
+                </Avatar>
+
+                {/* Message Bubble */}
+                <Paper
+                    elevation={1}
+                    sx={{
+                        padding: 2,
+                        borderRadius: 2,
+                        backgroundColor: isUser ? 'green.100' : 'blue.100',
+                        color: isUser ? 'green.900' : 'blue.900',
+                        maxWidth: '70%',
+                    }}>
+                    <Typography>{message.content}</Typography>
+                </Paper>
+            </Box>
+        </Fade>
     );
 };
 
