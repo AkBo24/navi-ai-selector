@@ -1,30 +1,38 @@
-import { Box, Typography } from '@mui/material';
+import React from 'react';
+import {
+    Box,
+    Paper,
+    Typography,
+    TextField,
+    IconButton,
+    CircularProgress,
+    Chip,
+} from '@mui/material';
+import SendIcon from '@mui/icons-material/Send';
 import {
     useCreateCompletionMutation,
     useGetChatRoomMessagesQuery,
     useGetChatRoomQuery,
-    type ChatRoom,
 } from '../../services/api';
 import { Formik } from 'formik';
 import Message from './components/Message';
 import * as yup from 'yup';
-import FormikTextField from '../../components/FormikTextField';
 
 const schema = yup.object().shape({
-    content: yup.string(),
+    content: yup.string().required('Message cannot be empty'),
 });
 
 const ChatRoom: React.FC<{ roomId: string }> = ({ roomId }) => {
     const { data: room, isSuccess } = useGetChatRoomQuery(roomId);
     const { data: messages, isSuccess: isMessagesSuccess } =
         useGetChatRoomMessagesQuery(roomId);
-    const [createCompletion] = useCreateCompletionMutation();
+    const [createCompletion, { isLoading }] = useCreateCompletionMutation();
 
     const handleSubmit = (
         values: { content: string },
         { resetForm }: { resetForm: () => void }
     ) => {
-        if (room == null || values.content.length === 0) return;
+        if (!room || !values.content) return;
 
         createCompletion({
             model: room.model_id,
@@ -38,50 +46,84 @@ const ChatRoom: React.FC<{ roomId: string }> = ({ roomId }) => {
 
     return (
         isSuccess && (
-            <>
+            <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+                <Paper elevation={3} sx={{ padding: 2, borderBottom: '1px solid #ddd' }}>
+                    <Box>
+                        <Typography variant='h5'>{room.title}</Typography>
+                        <Box sx={{ display: 'flex', gap: 1, marginTop: 1 }}>
+                            <Chip label={`Provider: ${room.provider}`} color='primary' />
+                            <Chip
+                                label={`Model ID: ${room.model_id}`}
+                                color='secondary'
+                            />
+                        </Box>
+                    </Box>
+                </Paper>
+
+                {/* Chat Messages */}
                 <Box
                     sx={{
                         flexGrow: 1,
-                        overflow: 'auto',
-                        border: '1px solid #ccc',
-                        borderRadius: 1,
-                        p: 2,
+                        overflowY: 'auto',
+                        padding: 2,
+                        backgroundColor: '#f7f9fc',
                     }}>
-                    <Typography variant='h4' sx={{ mb: 2 }}>
-                        {room.title}
-                    </Typography>
                     {isMessagesSuccess &&
                         messages.map(
-                            (m) => m.role != 'system' && <Message message={m} />
+                            (m, idx) =>
+                                m.role !== 'system' && <Message key={idx} message={m} />
                         )}
                 </Box>
+
+                {/* Chat Input */}
                 <Formik
                     initialValues={{ content: '' }}
                     validationSchema={schema}
                     onSubmit={handleSubmit}>
-                    {({ submitForm }) => (
+                    {({ values, handleChange, handleSubmit }) => (
                         <Box
                             component='form'
                             onSubmit={(e) => {
                                 e.preventDefault();
-                                submitForm();
+                                handleSubmit();
+                            }}
+                            sx={{
+                                padding: 2,
+                                display: 'flex',
+                                alignItems: 'center',
+                                borderTop: '1px solid #ddd',
+                                backgroundColor: '#fff',
                             }}>
-                            <FormikTextField
+                            <TextField
                                 name='content'
-                                label='content'
+                                value={values.content}
+                                onChange={handleChange}
+                                placeholder='Type your message...'
                                 variant='outlined'
+                                fullWidth
+                                size='small'
                                 onKeyDown={(e) => {
                                     if (e.key === 'Enter') {
                                         e.preventDefault();
-                                        submitForm();
+                                        handleSubmit();
                                     }
                                 }}
-                                fullWidth
+                                sx={{ marginRight: 1 }}
                             />
+                            <IconButton
+                                type='submit'
+                                color='primary'
+                                disabled={isLoading}>
+                                {isLoading ? (
+                                    <CircularProgress size={24} />
+                                ) : (
+                                    <SendIcon />
+                                )}
+                            </IconButton>
                         </Box>
                     )}
                 </Formik>
-            </>
+            </Box>
         )
     );
 };
