@@ -191,7 +191,7 @@ class CompletionView(APIView):
             stream = client.messages.create(
                 max_tokens=1024,
                 messages=message_list,
-                model="claude-3-opus-20240229",
+                model=model_id,
                 stream=True,
             )
 
