@@ -1,0 +1,44 @@
+Assignment Overview
+Objective: Build a web-based tool that enables users to interact with the current AI models from OpenAI (all models) and Anthropic (all models). The tool should accept model inputs (such as prompts and user data) and display model outputs in real time.
+
+Project Requirements
+Frontend (React):
+
+Form Interface: Design a simple form that allows users to:
+Select between all the current AI models from OpenAI and Anthropic.
+Input a system prompt (initial instructions for the model).
+Input user data (the user’s message or question).
+View model responses in real time.
+UI Requirements:
+Use a minimal, clean UI to keep the focus on functionality.
+Display error messages or loading indicators if applicable.
+Optional Enhancements:
+Add a history section where users can view past interactions.
+Backend (Python):
+
+API Setup: Set up a backend API using Python (Django) to:
+Receive data from the frontend, including the model type, system prompt, and user input.
+Route the request to the appropriate model API (OpenAI or Anthropic).
+Return the AI model's response to the frontend.
+Environment & Configurations:
+Use configuration files or environment variables to securely store API keys.
+Error Handling:
+Implement basic error handling for network errors, invalid inputs, or API errors (such as invalid API keys).
+General Functionality:
+
+Real-time Interaction: Ensure the frontend receives model responses in real time, ideally with a brief loading animation.
+Documentation:
+Provide documentation on setting up and running the app.
+Add comments in the code explaining the functionality of major components and functions.
+Expected Deliverables
+Codebase: A GitHub repository containing the full project code.
+Readme: A short README file that explains:
+How to set up and run the project locally.
+Instructions on how to configure the API keys.
+Demo: A short video or GIF demonstrating the app’s basic functionality.
+
+Evaluation Criteria
+Frontend: Clarity and usability of the form interface, responsiveness, and real-time updates.
+Backend: Correct setup of API routes, efficiency in handling requests, and proper error handling.
+Code Quality: Clean, well-documented code with clear function/variable naming.
+Documentation: Completeness and clarity of the README file.

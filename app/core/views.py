@@ -6,6 +6,7 @@ from rest_framework import status
 from .serializers import CompletionSerializer
 from drf_spectacular.utils import extend_schema
 from anthropic import Anthropic
+from openai import OpenAI
 
 import os
 import requests
@@ -32,16 +33,11 @@ class ModelListView(APIView):
         return Response(models, status=status.HTTP_200_OK)
 
     def get_openai_models(self):
-        headers = {
-            'Authorization': f'Bearer {os.getenv("OPENAI_API_KEY")}'
-        }
         try:
-            response = requests.get('https://api.openai.com/v1/models', headers=headers)
-            response.raise_for_status()
-            data = response.json()
-            models = [model['id'] for model in data.get('data', [])]
-            return models
-        except requests.exceptions.RequestException as e:
+            client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+            models = client.models.list()
+            return [model.id for model in models.data]
+        except Exception as e:
             return {'error': str(e)}
 
     def get_anthropic_models(self):
@@ -69,8 +65,6 @@ class ModelListView(APIView):
             
         except Exception as e:
             return {'error': str(e)}
-
-
 
 class CompletionView(APIView):
     @extend_schema(
@@ -122,24 +116,31 @@ class CompletionView(APIView):
         return Response(response, status=status.HTTP_200_OK)
 
     def openai_completion(self, model_id, system_prompt, message):
-        headers = {
-            'Authorization': f'Bearer {os.getenv("OPENAI_API_KEY")}',
-            'Content-Type': 'application/json'
-        }
-        payload = {
-            'model': model_id,
-            'messages': [
-                {'role': 'system', 'content': system_prompt},
-                {'role': 'user', 'content': message}
-            ],
-            'max_tokens': 150, #TODO: check if this is okay
-        }
         try:
-            response = requests.post('https://api.openai.com/v1/chat/completions', headers=headers, json=payload)
-            response.raise_for_status()
-            data = response.json()
-            return data  # Todo: see if formating is required
-        except requests.exceptions.RequestException as e:
+            client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+            
+            response = client.chat.completions.create(
+                model=model_id,
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": message}
+                ],
+                max_tokens=150  # TODO: check if this is okay
+            )
+            
+            formatted_response = {
+                'id': response.id,
+                'model': response.model,
+                'content': response.choices[0].message.content,
+                'usage': {
+                    'input_tokens': response.usage.prompt_tokens,
+                    'output_tokens': response.usage.completion_tokens
+                },
+                'finish_reason': response.choices[0].finish_reason
+            }
+            
+            return formatted_response
+        except Exception as e:
             return {'error': str(e)}
 
     def anthropic_completion(self, model_id, system_prompt, message):
