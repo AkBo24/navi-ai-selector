@@ -4,8 +4,8 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import type { ChatRoom as ChatRoomType } from './services/api';
 import MenuIcon from '@mui/icons-material/Menu';
 import NewChat from './features/NewChat';
-import Menu from './components/Menu';
 import ChatRoom from './features/ChatRoom/ChatRoom';
+import Menu from './components/Menu/Menu';
 
 const theme = createTheme({
     palette: {

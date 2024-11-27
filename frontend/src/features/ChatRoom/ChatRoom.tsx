@@ -27,7 +27,7 @@ const schema = yup.object().shape({
 
 const ChatRoom: React.FC<{
     roomId: string;
-    initialContent?: string;
+    initialContent: string | null;
     clearInitialContent: () => void;
 }> = ({ roomId, initialContent, clearInitialContent }) => {
     const { data: room, isSuccess, isLoading } = useGetChatRoomQuery(roomId);
