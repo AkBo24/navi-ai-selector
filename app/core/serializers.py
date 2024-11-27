@@ -10,4 +10,4 @@ class UserCreateSerializer(BaseUserCreateSerializer):
 
 class CompletionSerializer(serializers.Serializer):
     system_prompt = serializers.CharField()
-    user_input = serializers.CharField()
+    message = serializers.CharField()

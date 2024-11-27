@@ -15,6 +15,18 @@ export type Todo = {
     owner?: User;
 };
 
+export type Prompt = {
+    provider: Provider;
+    model: string;
+    systemPrompt: string;
+    message: string;
+};
+
+export type Message = {
+    from: 'user' | 'provider';
+    content: string;
+};
+
 export const api = createApi({
     reducerPath: 'api',
     baseQuery: fetchBaseQuery({ baseUrl: 'http://localhost:8000/api/' }),
@@ -37,6 +49,16 @@ export const api = createApi({
         getModels: builder.query<string[], Provider>({
             query: (provider) => `providers/${provider}/models`,
             providesTags: ['models'],
+        }),
+        createCompletion: builder.mutation<any, Prompt>({
+            query: ({ provider, model, systemPrompt, message }) => ({
+                url: `/providers/${provider}/models/${model}/completions/`,
+                method: 'POST',
+                body: {
+                    system_prompt: systemPrompt,
+                    message,
+                },
+            }),
         }),
         getTodos: builder.query<Todo[], void>({
             query: () => `todos`,
@@ -66,6 +88,7 @@ export const {
     useCheckAuthQuery,
     useGetProvidersQuery,
     useLazyGetModelsQuery,
+    useCreateCompletionMutation,
     useGetTodosQuery,
     useAddTodoMutation,
     useUpdateTodoMutation,

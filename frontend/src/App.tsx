@@ -3,8 +3,8 @@ import { useCheckAuthQuery } from './services/api';
 import AiProvider from './features/AiProvider/AiProvider';
 
 function App() {
-    const { data: isAuthenticated } = useCheckAuthQuery();
-    console.log(isAuthenticated);
+    // const { data: isAuthenticated } = useCheckAuthQuery();
+    // console.log(isAuthenticated);
 
     return (
         <Container maxWidth='sm'>

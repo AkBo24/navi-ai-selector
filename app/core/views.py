@@ -71,12 +71,12 @@ class CompletionView(APIView):
                         'type': 'string',
                         'description':'The contextual input for the LLM'
                     },
-                    'user_input': {
+                    'message': {
                         'type': 'string',
                         'description':'The message or question provided by the user'
                     },
                 },
-                'required': ['system_prompt', 'user_input'],
+                'required': ['system_prompt', 'message'],
             }
         },
         responses={
@@ -92,13 +92,13 @@ class CompletionView(APIView):
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         system_prompt = serializer.validated_data['system_prompt']
-        user_input = serializer.validated_data['user_input']
+        message = serializer.validated_data['message']
         provider_name = provider_name.lower()
 
         if provider_name == 'openai':
-            response = self.openai_completion(model_id, system_prompt, user_input)
+            response = self.openai_completion(model_id, system_prompt, message)
         elif provider_name == 'anthropic':
-            response = self.anthropic_completion(model_id, system_prompt, user_input)
+            response = self.anthropic_completion(model_id, system_prompt, message)
         else:
             return Response(
                 {'error': 'Provider not found.'},
@@ -110,7 +110,7 @@ class CompletionView(APIView):
 
         return Response(response, status=status.HTTP_200_OK)
 
-    def openai_completion(self, model_id, system_prompt, user_input):
+    def openai_completion(self, model_id, system_prompt, message):
         headers = {
             'Authorization': f'Bearer {os.getenv("OPENAI_API_KEY")}',
             'Content-Type': 'application/json'
@@ -119,7 +119,7 @@ class CompletionView(APIView):
             'model': model_id,
             'messages': [
                 {'role': 'system', 'content': system_prompt},
-                {'role': 'user', 'content': user_input}
+                {'role': 'user', 'content': message}
             ],
             'max_tokens': 150, #TODO: check if this is okay
         }
@@ -131,7 +131,7 @@ class CompletionView(APIView):
         except requests.exceptions.RequestException as e:
             return {'error': str(e)}
 
-    def anthropic_completion(self, model_id, system_prompt, user_input):
+    def anthropic_completion(self, model_id, system_prompt, message):
         # Implement the actual Anthropic completion logic based on their API
         """ something like…        
         headers = {
@@ -140,7 +140,7 @@ class CompletionView(APIView):
         }
         payload = {
             'model': model_id,
-            'prompt': f"{system_prompt}\n{user_input}",
+            'prompt': f"{system_prompt}\n{message}",
             'max_tokens_to_sample': 150,
         }
         try:
