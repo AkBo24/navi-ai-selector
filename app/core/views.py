@@ -61,10 +61,13 @@ class ModelListView(APIView):
             return {'error': str(e)}
 
     def get_anthropic_models(self):
+        """
+        Anthropic does not have an endpoint to retrieve all models.
+        """
         try:
             models = [
+                "claude-3-5-sonnet-20241022",
                 "claude-3-opus-20240229",
-                "claude-3-sonnet-20240229",
                 "claude-3-haiku-20240307"
             ]
             if not os.getenv("ANTHROPIC_API_KEY"):
@@ -170,27 +173,36 @@ class CompletionView(APIView):
         try:
             client = Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
             
+            # Format messages for Anthropic's API
             message_list = []
             for msg in messages:
                 if msg.role != 'system':
+                    # Anthropic only accepts 'user' and 'assistant' roles
+                    role = 'user' if msg.role in ['user', 'human'] else 'assistant'
                     message_list.append({
-                        "role": msg.role,
+                        "role": role,
                         "content": msg.content
                     })
 
+            # Initialize content accumulator
             full_content = ""
+            
+            # Stream the response
             stream = client.messages.create(
                 model=model_id,
-                system=system_prompt,
+                system=system_prompt if system_prompt else None,
                 max_tokens=1000,
                 messages=message_list,
                 stream=True
             )
 
             for chunk in stream:
-                if chunk.delta.text:
-                    content = chunk.delta.text
+                if isinstance(chunk.type, str) and chunk.type == "content_block_start":
+                    continue
+                if hasattr(chunk, 'content'):
+                    content = chunk.content[0].text
                     full_content += content
+                    print(content)
                     yield f"data: {json.dumps({'content': content, 'type': 'chunk'})}\n\n"
 
             # Save the complete message after streaming
@@ -198,12 +210,13 @@ class CompletionView(APIView):
                 chatroom=chatroom,
                 role='assistant',
                 content=full_content,
-                input_tokens=chunk.usage.input_tokens if hasattr(chunk, 'usage') else None,
-                output_tokens=chunk.usage.output_tokens if hasattr(chunk, 'usage') else None
+                input_tokens=None,
+                output_tokens=None
             )
             
             # Send final message with complete content
             yield f"data: {json.dumps({'type': 'done', 'message': MessageSerializer(message).data})}\n\n"
             
         except Exception as e:
+            print(f"Anthropic streaming error: {str(e)}")
             yield f"data: {json.dumps({'error': str(e)})}\n\n"
